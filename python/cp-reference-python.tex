@@ -1,112 +1,238 @@
+% =====================================================================
+%  CP Reference Book - Python Edition
+%  Adan Arteaga
+%  Self-contained: drop this single file into Overleaf and it compiles.
+%  Build: pdflatex -interaction=nonstopmode cp-reference-python.tex (twice)
+% =====================================================================
 \documentclass[10pt]{article}
 
-% =========================
+% ---------------------------------------------------------------------
 % Language and encoding
-% =========================
+% ---------------------------------------------------------------------
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 
-% =========================
-% Page layout
-% =========================
-\usepackage[landscape,margin=0.9cm]{geometry}
+% ---------------------------------------------------------------------
+% Page geometry: landscape, tight margins, two columns
+% ---------------------------------------------------------------------
+\usepackage[landscape,margin=1cm,top=1.4cm,bottom=1.2cm,headsep=0.35cm]{geometry}
 \usepackage{multicol}
 \setlength{\columnsep}{0.75cm}
-\setlength{\columnseprule}{0.35pt}
+\setlength{\columnseprule}{0.4pt}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{3pt}
+\setlength{\parskip}{2.5pt}
 \raggedcolumns
 
-% =========================
-% Math, color, links, lists
-% =========================
+% ---------------------------------------------------------------------
+% Core packages
+% ---------------------------------------------------------------------
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{xcolor}
-\usepackage{hyperref}
 \usepackage{enumitem}
-\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
 \usepackage{listings}
-\usepackage{needspace}
+\usepackage{fancyhdr}
+\usepackage[nobottomtitles*]{titlesec}
+\usepackage{hyperref}
+
+% ---------------------------------------------------------------------
+% Palette
+% ---------------------------------------------------------------------
+\definecolor{accent}{HTML}{18456B}
+\definecolor{accent2}{HTML}{0E7C66}
+\definecolor{codebg}{HTML}{F5F7F9}
+\definecolor{hairline}{HTML}{C3CFD9}
+\definecolor{kw}{HTML}{0B5FA5}
+\definecolor{cmt}{HTML}{6A737D}
+\definecolor{strc}{HTML}{1B7A3D}
+\definecolor{warnc}{HTML}{B00020}
+\definecolor{tipc}{HTML}{9A6100}
+
+\renewcommand{\columnseprulecolor}{\color{hairline}}
 
 \hypersetup{
     colorlinks=true,
-    linkcolor=blue!45!black,
-    urlcolor=blue!45!black
+    linkcolor=accent,
+    urlcolor=accent2,
+    bookmarksnumbered=true,
+    bookmarksopen=true,
+    bookmarksdepth=2,
+    pdftitle={CP Reference Book - Python Edition},
+    pdfauthor={Adan Arteaga}
 }
 
-% =========================
-% Section style
-% =========================
-\titleformat{\section}{\Large\bfseries\color{blue!45!black}}{\thesection}{0.7em}{}
-\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection}{0.6em}{}
-\titlespacing*{\section}{0pt}{7pt}{4pt}
-\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+% ---------------------------------------------------------------------
+% Headings
+% ---------------------------------------------------------------------
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{1}
+\renewcommand{\bottomtitlespace}{0.09\textheight}
 
-\setlist[itemize]{leftmargin=*, itemsep=1pt, topsep=2pt}
+% titlesec passes the title to the LAST command of the before-code,
+% so both headings are wrapped in a helper that takes it as #1.
+\newcommand{\sectionbar}[1]{%
+  \hspace*{-\fboxsep}\colorbox{accent}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \vspace{2.5pt}\color{white}\thesection\hspace{0.8em}#1\vspace{2.5pt}}}}
+% Starred sections (the TOC heading) must not print a number.
+\newcommand{\sectionbarplain}[1]{%
+  \hspace*{-\fboxsep}\colorbox{accent}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \vspace{2.5pt}\color{white}#1\vspace{2.5pt}}}}
+% Thin rule under the title, drawn inside the heading so it cannot
+% collide with the text the way a titlesec after-code rule does.
+\newcommand{\subhead}[1]{%
+  \raisebox{0.35ex}{\color{accent2}\rule{2.1mm}{2.1mm}}\hspace{0.55em}#1%
+  \par\nobreak\vspace{1.5pt}{\color{hairline}\hrule height 0.4pt}\nobreak}
 
-% =========================
+\titleformat{\section}[block]
+  {\normalfont\large\bfseries}{}{0pt}{\sectionbar}
+\titleformat{name=\section,numberless}[block]
+  {\normalfont\large\bfseries}{}{0pt}{\sectionbarplain}
+\titlespacing*{\section}{0pt}{16pt}{9pt}
+
+\titleformat{\subsection}[block]
+  {\normalfont\normalsize\bfseries\color{accent}}{}{0pt}{\subhead}
+\titlespacing*{\subsection}{0pt}{8pt}{-7pt}
+
+\setlist[itemize]{leftmargin=1.1em, itemsep=1pt, topsep=2pt, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.4em, itemsep=1pt, topsep=2pt, parsep=0pt}
+
+% ---------------------------------------------------------------------
+% Running head / foot
+% ---------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{cmt}\nouppercase{\leftmark}}
+\fancyhead[R]{\footnotesize\color{cmt}CP Reference Book \textbullet\ Python Edition}
+\fancyfoot[C]{\footnotesize\color{cmt}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\color{hairline}\hrule height \headrulewidth}
+
+% ---------------------------------------------------------------------
 % Code style
-% =========================
-\lstdefinestyle{pystyle}{
+% ---------------------------------------------------------------------
+\lstdefinestyle{py}{
     language=Python,
     basicstyle=\ttfamily\scriptsize,
-    keywordstyle=\bfseries\color{blue!55!black},
-    commentstyle=\itshape\color{gray!70!black},
-    stringstyle=\color{green!35!black},
+    backgroundcolor=\color{codebg},
+    keywordstyle=\bfseries\color{kw},
+    commentstyle=\itshape\color{cmt},
+    stringstyle=\color{strc},
+    frame=leftline,
+    framerule=1.3pt,
+    rulecolor=\color{accent2},
+    framexleftmargin=4pt,
+    framexrightmargin=2pt,
+    xleftmargin=5pt,
     breaklines=true,
     breakatwhitespace=false,
+    postbreak=\mbox{\textcolor{cmt}{$\hookrightarrow$}\space},
     columns=fullflexible,
     keepspaces=true,
     showstringspaces=false,
-    tabsize=2,
-    frame=single,
-    rulecolor=\color{black!20},
-    framerule=0.3pt,
-    xleftmargin=1pt,
-    xrightmargin=1pt,
-    aboveskip=3pt,
-    belowskip=3pt
+    tabsize=4,
+    aboveskip=5pt,
+    belowskip=5pt,
+    upquote=true,
+    morekeywords={yield,async,await,match,case,nonlocal}
 }
-\lstset{style=pystyle}
+\lstset{style=py}
 
-\newcommand{\code}[1]{\texttt{#1}}
-\newenvironment{cpblock}[1]{\par\Needspace{18\baselineskip}\begin{minipage}{\linewidth}\subsection{#1}}{\end{minipage}\par\vspace{5pt}}
+% ---------------------------------------------------------------------
+% Semantic macros
+% ---------------------------------------------------------------------
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\sub}[2]{\subsection[#1]{#1\hspace{0.6em}%
+  \textnormal{\color{accent2}\small$\mathcal{O}(#2)$}}}
+\newcommand{\uses}[1]{{\color{accent2}\footnotesize\textbf{Use:}}~{\footnotesize #1}\par}
+\newcommand{\tip}[1]{{\color{tipc}\footnotesize\textbf{Tip:}}~{\footnotesize #1}\par}
+\newcommand{\warn}[1]{{\color{warnc}\footnotesize\textbf{Careful:}}~{\footnotesize #1}\par}
+\newcommand{\note}[1]{{\footnotesize\color{cmt}#1}\par}
 
 \begin{document}
 \pagenumbering{gobble}
 
-% =========================
+% =====================================================================
 % Cover
-% =========================
+% =====================================================================
 \begin{titlepage}
     \centering
-    \vspace*{2cm}
-    {\Huge\bfseries Python Competitive Programming Reference Book\par}
+    \vspace*{1.6cm}
+
+    {\color{accent}\rule{\linewidth}{2.5pt}}
     \vspace{0.7cm}
-    {\Huge Arteaga Adán\par}
-    \vspace{1.2cm}
-    {\Huge Algorithms Sheet - Python Edition\par}
+
+    {\Huge\bfseries\color{accent} CP Reference Book\par}
     \vspace{0.5cm}
-    {\Large Clean, contest-ready, interview-friendly snippets\par}
+    {\LARGE Python Edition\par}
+
+    \vspace{0.5cm}
+    {\color{accent}\rule{\linewidth}{2.5pt}}
+
+    \vspace{1.4cm}
+    {\Large Adán Arteaga\par}
+
+    \vspace{1.4cm}
+    {\large A contest-ready reference for competitive programming\\
+    and technical interviews\par}
+
+    \vspace{0.9cm}
+    {\normalsize\color{cmt}
+    Every snippet runs as written --- no pseudocode, no placeholders.\\
+    Complexities are stated where the choice matters.\par}
+
     \vfill
-    {\large \textbf{Python version}\par}
-    
-    \vfill
-    {\large Python version for competitive programming\par}
+    {\footnotesize\color{cmt}Landscape layout, two columns, built for printing.\\
+    Clickable table of contents and full PDF bookmarks for on-screen use.\par}
 \end{titlepage}
 
+\pagenumbering{roman}
+\thispagestyle{plain}
 \tableofcontents
 \newpage
 \pagenumbering{arabic}
 
-% =========================
-\section{Python Contest Setup}
-% =========================
-\begin{cpblock}{Fast Input}
-Use this when input is large. It is usually faster than repeated \code{input()}.
+% =====================================================================
+\section{Contest Setup and Complexity}
+% =====================================================================
+\begin{multicols}{2}
+
+\subsection{Full Template}
+\begin{lstlisting}
+import sys
+from math import gcd, isqrt, inf
+from collections import deque, defaultdict, Counter
+from bisect import bisect_left, bisect_right
+from heapq import heappush, heappop
+from itertools import accumulate, permutations, combinations
+
+input = sys.stdin.readline
+
+INF = float('inf')
+MOD = 10**9 + 7
+
+def solve():
+    n = int(input())
+    a = list(map(int, input().split()))
+    # ...
+
+def main():
+    t = int(input())        # remove if single test case
+    for _ in range(t):
+        solve()
+
+main()
+\end{lstlisting}
+\tip{Wrapping the work in a function is a real speedup: CPython resolves
+local variables by index and globals by dictionary lookup. The same loop
+runs noticeably faster inside \code{main()} than at module level.}
+
+\subsection{Fast Input}
 \begin{lstlisting}
 import sys
 input = sys.stdin.readline
@@ -114,10 +240,11 @@ input = sys.stdin.readline
 n = int(input())
 a = list(map(int, input().split()))
 \end{lstlisting}
-\end{cpblock}
+\warn{\code{sys.stdin.readline} keeps the trailing newline. For integers
+\code{int()} strips it, but for strings you must call
+\code{.strip()} or \code{.rstrip()} yourself.}
 
-\begin{cpblock}{Read All Tokens}
-Best for very large input with many integers.
+\subsection{Reading Everything at Once}
 \begin{lstlisting}
 import sys
 
@@ -127,270 +254,488 @@ it = iter(data)
 n = int(next(it))
 a = [int(next(it)) for _ in range(n)]
 \end{lstlisting}
-\end{cpblock}
+\uses{the fastest input method in Python. With $10^6$ numbers this is
+several times quicker than looping over \code{input()}.}
 
-\begin{cpblock}{Useful Imports}
+\subsection{Fast Output}
 \begin{lstlisting}
 import sys
-from math import gcd, isqrt, inf
-from collections import deque, defaultdict, Counter
-from bisect import bisect_left, bisect_right
-from heapq import heappush, heappop
-from itertools import accumulate, permutations, combinations
-\end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Recursion Limit}
-For deep DFS, increase the recursion limit. If recursion still risks stack issues, use iterative DFS.
+out = []
+for x in results:
+    out.append(str(x))
+sys.stdout.write("\n".join(out) + "\n")
+\end{lstlisting}
+\warn{Calling \code{print()} $10^5$ times is slow enough to TLE on its
+own. Buffer the lines and write once.}
+
+\subsection{Recursion Limit}
 \begin{lstlisting}
 import sys
-sys.setrecursionlimit(1_000_000)
+sys.setrecursionlimit(300000)
 \end{lstlisting}
-\end{cpblock}
+\warn{Raising the limit does not enlarge the C stack --- deep recursion
+still segfaults. For $n \ge 10^5$, write the DFS iteratively.}
 
-\begin{cpblock}{Infinity and Constants}
+\subsection{Deep Recursion via a Thread}
 \begin{lstlisting}
-INF = 10**30
-MOD = 998244353
-# Common alternative:
-MOD2 = 10**9 + 7
-\end{lstlisting}
-\end{cpblock}
+import sys, threading
 
-\begin{cpblock}{Python Contest Notes}
+def main():
+    # recursive solution here
+    ...
+
+sys.setrecursionlimit(1 << 25)
+threading.stack_size(1 << 27)      # 128 MB stack
+threading.Thread(target=main).start()
+\end{lstlisting}
+\uses{when a recursive solution is far cleaner than the iterative one.
+A thread gets its own stack, whose size you control.}
+
+\subsection{Constants}
+\begin{lstlisting}
+INF = float('inf')     # compares correctly, but is a float
+BIG = 10**18           # use when you need a real integer
+MOD = 10**9 + 7
+MOD2 = 998244353
+\end{lstlisting}
+\warn{\code{float('inf')} used in integer arithmetic silently turns
+results into floats and loses exactness past $2^{53}$. In DP tables
+prefer \code{10**18}.}
+
+\subsection{Complexity Classes}
 \begin{itemize}
-    \item Prefer \code{sys.stdin.readline} or \code{buffer.read().split()} for heavy input.
-    \item Use \code{deque} for queues, not \code{list.pop(0)}.
-    \item Use \code{heapq} for priority queues.
-    \item Use \code{bisect} for binary search on sorted arrays.
-    \item Use \code{dict}, \code{set}, and \code{Counter} heavily.
-    \item Prefer iterative DFS for very deep graphs.
+    \item $O(1)$ --- index access, average dict/set lookup.
+    \item $O(\log n)$ --- binary search, heap push/pop.
+    \item $O(\sqrt n)$ --- divisors, simple primality.
+    \item $O(n)$ --- a single pass.
+    \item $O(n \log n)$ --- sorting, most greedy solutions.
+    \item $O(n^2)$ --- nested loops, many DP tables.
+    \item $O(2^n)$ --- subsets, bitmask DP.
+    \item $O(n!)$ --- permutations.
 \end{itemize}
-\end{cpblock}
 
-\newpage
+\subsection{Constraint to Complexity}
+Python runs roughly $10^7$ interpreted operations per second --- about
+an order of magnitude slower than C++.
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Constraint} & \textbf{Target} & \textbf{Python} \\
+\midrule
+$n \le 10$      & $O(n!)$          & fine \\
+$n \le 20$      & $O(2^n n)$       & fine \\
+$n \le 500$     & $O(n^3)$         & risky \\
+$n \le 5000$    & $O(n^2)$         & risky \\
+$n \le 10^5$    & $O(n \log n)$    & fine \\
+$n \le 10^6$    & $O(n)$           & keep the loop simple \\
+$n \le 10^{18}$ & $O(\log n)$      & fine \\
+\bottomrule
+\end{tabular}
+\end{center}
+\tip{When only the constant factor is the problem, push the loop into C:
+\code{sum()}, \code{map()}, \code{sorted()}, slicing and
+\code{itertools} all run at native speed. A comprehension beats an
+explicit \code{for} with \code{.append()}.}
 
-% =========================
-\section{Complexities and Python Structures}
-% =========================
-\begin{cpblock}{Common Time Complexities}
+\subsection{Cost of Python Structures}
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Operation} & \textbf{Cost} \\
+\midrule
+\code{list} append / pop back   & $O(1)$ amortized \\
+\code{list} insert / pop(0)     & $O(n)$ \\
+\code{list} \code{in}           & $O(n)$ \\
+\code{dict} / \code{set} get, add & $O(1)$ average \\
+\code{set} \code{in}            & $O(1)$ average \\
+\code{deque} push/pop both ends & $O(1)$ \\
+\code{heapq} push / pop         & $O(\log n)$ \\
+\code{bisect} search            & $O(\log n)$ \\
+\code{list.insert} after bisect & $O(n)$ \\
+\code{sorted()} / \code{.sort()}& $O(n \log n)$ \\
+string concat in a loop         & $O(n^2)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\warn{Two silent quadratics: \code{a.pop(0)} in a loop (use
+\code{deque}) and \code{s += ch} in a loop (collect into a list and
+\code{"".join()}).}
+
+\subsection{PyPy vs CPython}
 \begin{itemize}
-    \item $O(1)$ - constant: index access, hash lookup average case.
-    \item $O(\log n)$ - logarithmic: binary search, heap push/pop.
-    \item $O(\sqrt n)$ - square root: divisors, simple primality checks.
-    \item $O(n)$ - linear: one pass over an array.
-    \item $O(n \log n)$ - sorting, many greedy solutions.
-    \item $O(n^2)$ - nested loops, some dynamic programming.
-    \item $O(2^n)$ - subsets and bitmask DP.
-    \item $O(n!)$ - permutations.
+    \item Choose PyPy when it is offered --- typically 5--30$\times$
+          faster on tight loops.
+    \item PyPy dislikes very large \code{int}s; CPython handles them
+          well.
+    \item On PyPy, plain loops are fast; on CPython, push work into
+          built-ins.
+    \item Recursion is slower on PyPy than on CPython. Prefer iterative.
 \end{itemize}
-\end{cpblock}
 
-\begin{cpblock}{Python Data Structures}
-\begin{itemize}
-    \item \code{list}: append/pop back $O(1)$ amortized, insert/delete middle $O(n)$.
-    \item \code{dict/set}: insert/find average $O(1)$, worst $O(n)$.
-    \item \code{deque}: push/pop both ends $O(1)$.
-    \item \code{heapq}: push/pop $O(\log n)$, min element $O(1)$.
-    \item \code{bisect}: search in sorted list $O(\log n)$, insertion still $O(n)$.
-    \item \code{Counter}: frequency map.
-\end{itemize}
-\end{cpblock}
+\end{multicols}
 
-\begin{cpblock}{Standard Constraints}
-\begin{itemize}
-    \item Python is slower than compiled languages, so constants matter.
-    \item $n=10^5$: usually $O(n)$ or $O(n\log n)$.
-    \item $n=500$: $O(n^3)$ may pass depending on constants.
-    \item $n=20$: $O(2^n \cdot n)$ is common.
-    \item $10^7$ simple operations can be risky but possible with optimized code.
-\end{itemize}
-\end{cpblock}
+% =====================================================================
+\section{Python Toolkit}
+% =====================================================================
+\begin{multicols}{2}
 
-\begin{cpblock}{Important Algorithms}
-\begin{itemize}
-    \item GCD: $O(\log(\min(a,b)))$
-    \item Binary exponentiation: $O(\log exp)$
-    \item Sieve of Eratosthenes: $O(n\log\log n)$
-    \item Prime factorization by trial division: $O(\sqrt n)$
-    \item DFS/BFS: $O(V+E)$
-    \item Dijkstra: $O(E\log V)$
-    \item Floyd-Warshall: $O(V^3)$
-    \item DSU: $O(\alpha(n))$ amortized
-    \item Segment Tree query/update: $O(\log n)$
-    \item Fenwick Tree query/update: $O(\log n)$
-    \item KMP, Z-function, Manacher: $O(n)$
-\end{itemize}
-\end{cpblock}
-
-\newpage
-
-% =========================
-\section{Input, Strings, and Parsing Basics}
-% =========================
-\begin{cpblock}{Read a Full Line}
-Equivalent to reading a whole line including spaces.
+\subsection{List Essentials}
 \begin{lstlisting}
-s = input().rstrip('\n')
+a = [0] * n                    # n zeros
+g = [[0] * m for _ in range(n)]   # n x m grid
+
+a.sort()
+a.sort(reverse=True)
+b = sorted(a)                  # returns a new list
+a.reverse()
+
+mn, mx = min(a), max(a)
+s = sum(a)
+c = a.count(x)
+i = a.index(x)                 # ValueError if absent
 \end{lstlisting}
-\end{cpblock}
+\warn{\code{[[0]*m]*n} creates $n$ references to the \emph{same} row.
+Writing \code{g[0][0]} changes every row. Always use the comprehension
+form.}
 
-\begin{cpblock}{Split a Line}
-Equivalent to tokenizing a string by whitespace.
+\subsection{Sorting with Keys}
 \begin{lstlisting}
-s = "10 20 30"
-a, b, c = map(int, s.split())
+pts.sort()                              # lexicographic
+pts.sort(key=lambda p: p[1])            # by second field
+pts.sort(key=lambda p: (p[0], -p[1]))   # asc, then desc
+words.sort(key=len)
+
+# Sort indices instead of the data
+order = sorted(range(n), key=lambda i: a[i])
 \end{lstlisting}
-\end{cpblock}
+\tip{Negating a key gives a descending sub-order without a custom
+comparator. For non-numeric keys, use \code{functools.cmp\_to\_key}.}
 
-\begin{cpblock}{Character and Word Tools}
+\subsection{Slicing}
 \begin{lstlisting}
-from collections import Counter
-
-s = "abacaba"
-freq = Counter(s)
-
-words = "one two three".split()
-joined = "-".join(words)
+a[l:r]        # elements l .. r-1  (r excluded)
+a[:k]         # first k
+a[-k:]        # last k
+a[::-1]       # reversed copy
+a[::2]        # every other element
+a[l:r] = []   # delete a slice in place
 \end{lstlisting}
-\end{cpblock}
+\warn{A slice is a \emph{copy}. Slicing inside a loop turns $O(n)$ into
+$O(n^2)$ --- use indices instead.}
 
-\begin{cpblock}{Sorting Strings}
+\subsection{Dicts, Sets and Counters}
 \begin{lstlisting}
-s = "dcba"
-t = ''.join(sorted(s))
+from collections import defaultdict, Counter
 
-arr = ["aaa", "b", "cc"]
-arr.sort(key=len)
+freq = defaultdict(int)
+for x in a:
+    freq[x] += 1
+
+cnt = Counter(a)
+cnt.most_common(3)             # 3 most frequent pairs
+cnt['missing']                 # 0, and does NOT insert
+
+adj = defaultdict(list)
+adj[u].append(v)
+
+seen = set()
+seen.add(x)
+seen.discard(x)                # no error when absent
+
+a_set & b_set   # intersection
+a_set | b_set   # union
+a_set - b_set   # difference
+a_set ^ b_set   # symmetric difference
 \end{lstlisting}
-\end{cpblock}
+\warn{Reading \code{d[k]} on a \code{defaultdict} \emph{creates} the
+key. Inside a loop that quietly grows the dict --- use
+\code{d.get(k, 0)} for read-only access.}
 
-\newpage
-
-% =========================
-\section{Binary Search}
-% =========================
-\begin{cpblock}{Basic Binary Search}
+\subsection{deque}
 \begin{lstlisting}
-l, r = 0, n - 1
-ans = -1
+from collections import deque
 
-while l <= r:
-    mid = (l + r) // 2
-    if a[mid] == x:
-        ans = mid
-        break
-    if a[mid] < x:
-        l = mid + 1
-    else:
-        r = mid - 1
+dq = deque()
+dq.append(x)      ; dq.appendleft(x)
+dq.pop()          ; dq.popleft()
+dq[0]             ; dq[-1]
+dq = deque(maxlen=k)   # auto-evicts from the left
 \end{lstlisting}
-\end{cpblock}
+\uses{BFS queues, sliding window extrema, 0--1 BFS.}
 
-\begin{cpblock}{Binary Search on Answer}
-Find the minimum value satisfying a monotonic predicate.
+\subsection{heapq}
 \begin{lstlisting}
-l, r = 0, 10**18
-ans = r
+from heapq import heappush, heappop, heapify, nlargest
 
-while l <= r:
-    mid = (l + r) // 2
-    if check(mid):
-        ans = mid
-        r = mid - 1
-    else:
-        l = mid + 1
+pq = []
+heappush(pq, (dist, node))
+d, u = heappop(pq)        # ALWAYS the smallest
+heapify(a)                # O(n), in place
+
+# Max-heap: negate on the way in and out
+heappush(pq, -x)
+x = -heappop(pq)
+
+top3 = nlargest(3, a)
 \end{lstlisting}
-\end{cpblock}
+\warn{\code{heapq} is min-only. There is no \code{heappop\_max} in the
+public API.}
+\tip{Tuples compare element by element, so \code{(cost, node)} sorts by
+cost automatically --- which is exactly what Dijkstra needs.}
 
-\begin{cpblock}{bisect Left and Right}
+\subsection{math Module}
 \begin{lstlisting}
-from bisect import bisect_left, bisect_right
+from math import (gcd, lcm, isqrt, comb, perm,
+                  factorial, log2, ceil, floor, inf)
 
-idx = bisect_left(a, x)   # first position with a[i] >= x
-idx2 = bisect_right(a, x) # first position with a[i] > x
-
-count_x = bisect_right(a, x) - bisect_left(a, x)
-exists = bisect_left(a, x) < len(a) and a[bisect_left(a, x)] == x
+gcd(a, b)          # any number of args in 3.9+
+lcm(a, b)          # 3.9+
+isqrt(n)           # EXACT integer sqrt
+comb(n, r)         # exact nCr, arbitrary precision
+perm(n, r)
+pow(a, b, MOD)     # fast modular exponentiation, built in
 \end{lstlisting}
-\end{cpblock}
+\warn{\code{int(n ** 0.5)} is wrong for large \code{n}: floating point
+rounds and you get an off-by-one. Always use \code{isqrt}.}
 
-\begin{cpblock}{Last True / First True Pattern}
+\subsection{Integer Division and Modulo}
 \begin{lstlisting}
-# first True over [lo, hi)
-lo, hi = 0, n
-while lo < hi:
-    mid = (lo + hi) // 2
-    if ok(mid):
-        hi = mid
-    else:
-        lo = mid + 1
-ans = lo
+7 // 2      # 3
+-7 // 2     # -4   floor division, NOT truncation
+-7 % 3      # 2    the result always has the sign of the divisor
+divmod(7, 2)     # (3, 1)
+
+# C-style truncation toward zero
+int(-7 / 2)      # -3
 \end{lstlisting}
-\end{cpblock}
+\uses{\code{x \% MOD} is already non-negative in Python for positive
+\code{MOD}, so the \code{(x \% M + M) \% M} dance from C++ is
+unnecessary.}
 
-\newpage
-
-% =========================
-\section{Math and Number Theory}
-% =========================
-\begin{cpblock}{GCD and LCM}
+\subsection{Big Integers}
 \begin{lstlisting}
-from math import gcd
+x = 2 ** 1000          # exact, no overflow, ever
+factorial(100)         # all 158 digits
+\end{lstlisting}
+\uses{no overflow bugs. Python removes the single most common C++ error
+class for free.}
+\warn{Arithmetic on huge integers is not $O(1)$ --- it scales with digit
+count. Keep taking \code{\% MOD} inside loops.}
 
-def lcm(a, b):
+\subsection{itertools}
+\begin{lstlisting}
+from itertools import (accumulate, permutations, combinations,
+                       product, groupby, chain)
+
+list(accumulate([1,2,3]))          # [1, 3, 6] prefix sums
+list(accumulate(a, max))           # running maximum
+permutations(a, 2)
+combinations(a, 2)                 # unordered pairs
+product(range(2), repeat=n)        # all n-bit tuples
+list(chain(*lists))                # flatten one level
+
+# Run-length encoding
+for ch, grp in groupby(s):
+    print(ch, len(list(grp)))
+\end{lstlisting}
+
+\subsection{Memoization}
+\begin{lstlisting}
+from functools import lru_cache, cache
+
+@cache                          # 3.9+, unbounded
+def f(i, j):
+    if i == 0:
+        return 0
+    return min(f(i - 1, j), f(i, j - 1)) + cost[i][j]
+
+@lru_cache(maxsize=None)        # equivalent, any version
+def g(state):
+    ...
+
+f.cache_clear()                 # between test cases!
+\end{lstlisting}
+\warn{Arguments must be hashable --- pass tuples, never lists. And clear
+the cache between test cases, or answers leak from one to the next.}
+\tip{Top-down memoization is often the fastest way to a correct DP under
+contest pressure. Convert to bottom-up only if it TLEs.}
+
+\subsection{Custom Sort Comparator}
+\begin{lstlisting}
+from functools import cmp_to_key
+
+# Order strings so their concatenation is largest
+def cmp(a, b):
+    if a + b > b + a: return -1
+    if a + b < b + a: return 1
+    return 0
+
+arr.sort(key=cmp_to_key(cmp))
+\end{lstlisting}
+\warn{\code{cmp\_to\_key} is noticeably slower than a plain key. Use a
+key function whenever the order can be expressed as one.}
+
+\subsection{Memory-Lean Containers}
+\begin{lstlisting}
+from array import array
+
+a = array('i', [0]) * n        # compact int32 array
+flags = bytearray(n)           # 1 byte per boolean
+grid = [input().rstrip() for _ in range(n)]   # strings
+\end{lstlisting}
+\tip{A Python \code{list} of ints costs $\approx$ 8 bytes per pointer
+\emph{plus} the object. \code{bytearray} and \code{array} cut memory by
+an order of magnitude when you are near the limit.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Math, Modular Arithmetic and Number Theory}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{GCD and LCM}{\log \min(a,b)}
+\begin{lstlisting}
+from math import gcd, lcm      # lcm needs 3.9+
+
+def lcm_safe(a, b):
     if a == 0 or b == 0:
         return 0
     return abs(a // gcd(a, b) * b)
-\end{lstlisting}
-\textbf{Properties:}
-\begin{itemize}
-    \item $gcd(a,b) \cdot lcm(a,b)=|a\cdot b|$
-    \item $gcd(a,b)=gcd(b,a \bmod b)$
-    \item $gcd(a,b,c)=gcd(a,gcd(b,c))$
-\end{itemize}
-\end{cpblock}
 
-\begin{cpblock}{Manual Euclidean GCD}
-\begin{lstlisting}
 def gcd_manual(a, b):
     while b:
         a, b = b, a % b
     return abs(a)
 \end{lstlisting}
-\end{cpblock}
+\textbf{Properties:}
+\begin{itemize}
+    \item $\gcd(a,b)\cdot\mathrm{lcm}(a,b) = |a\cdot b|$.
+    \item $\gcd(a,b) = \gcd(b, a \bmod b)$.
+    \item $\gcd(a,b,c) = \gcd(a, \gcd(b,c))$.
+\end{itemize}
+\tip{\code{gcd(*a)} folds the gcd over a whole list in one call.}
 
-\begin{cpblock}{Classic Sieve + Factorization}
+\sub{Extended Euclid}{\log \min(a,b)}
+Solves $ax + by = \gcd(a,b)$.
+\begin{lstlisting}
+def extgcd(a, b):
+    if b == 0:
+        return a, 1, 0
+    g, x1, y1 = extgcd(b, a % b)
+    return g, y1, x1 - (a // b) * y1
+\end{lstlisting}
+\uses{modular inverse for a non-prime modulus, and linear Diophantine
+equations.}
+
+\subsection{Linear Diophantine}
+$ax + by = c$ is solvable iff $\gcd(a,b) \mid c$.
+\begin{lstlisting}
+def solve_dio(a, b, c):
+    g, x, y = extgcd(a, b)
+    if c % g:
+        return None
+    k = c // g
+    return x * k, y * k, g
+# General family: x + t*(b/g),  y - t*(a/g)
+\end{lstlisting}
+
+\sub{Modular Exponentiation}{\log b}
+\begin{lstlisting}
+ans = pow(a, b, MOD)           # built in, C speed
+
+def binpow(a, b, mod):         # the manual version
+    res = 1
+    a %= mod
+    while b:
+        if b & 1:
+            res = res * a % mod
+        a = a * a % mod
+        b >>= 1
+    return res
+\end{lstlisting}
+\tip{Always use the built-in three-argument \code{pow}. It is written in
+C and beats any Python loop.}
+
+\sub{Modular Inverse}{\log m}
+\begin{lstlisting}
+# MOD prime (Fermat)
+def inv(a, mod=MOD):
+    return pow(a, mod - 2, mod)
+
+# Python 3.8+: works for ANY coprime modulus
+def inv_any(a, mod):
+    return pow(a, -1, mod)     # ValueError if not coprime
+\end{lstlisting}
+\warn{The three-argument \code{pow} with a negative exponent needs
+Python 3.8 or newer. On older judges fall back to \code{extgcd}.}
+
+\subsection{Modulo Properties}
+\[(a+b)\bmod m=((a\bmod m)+(b\bmod m))\bmod m\]
+\[(a-b)\bmod m=((a\bmod m)-(b\bmod m))\bmod m\]
+\[(a \cdot b)\bmod m=((a\bmod m)(b\bmod m))\bmod m\]
+\uses{Python's \code{\%} already returns a non-negative value for a
+positive modulus, so no correction term is needed.}
+\warn{Division still does not distribute. Multiply by the inverse.}
+
+\sub{Factorials and nCr}{n \text{ precompute},\; 1 \text{ per query}}
+\begin{lstlisting}
+MAXN = 10**6 + 5
+fact = [1] * MAXN
+for i in range(1, MAXN):
+    fact[i] = fact[i - 1] * i % MOD
+
+invfact = [1] * MAXN
+invfact[MAXN - 1] = pow(fact[MAXN - 1], MOD - 2, MOD)
+for i in range(MAXN - 1, 0, -1):
+    invfact[i - 1] = invfact[i] * i % MOD
+
+def nCr(n, r):
+    if r < 0 or r > n:
+        return 0
+    return fact[n] * invfact[r] % MOD * invfact[n - r] % MOD
+
+def nPr(n, r):
+    if r < 0 or r > n:
+        return 0
+    return fact[n] * invfact[n - r] % MOD
+\end{lstlisting}
+\[C(n,r) = \frac{n!}{r!\,(n-r)!} \qquad P(n,r) = \frac{n!}{(n-r)!}\]
+\tip{The backward loop gets all inverse factorials from a single
+\code{pow}. If no modulus is required at all, \code{math.comb(n, r)} is
+exact and instant.}
+
+\subsection{Combinatorial Identities}
+\begin{itemize}
+    \item $C(n,r) = C(n-1,r-1) + C(n-1,r)$ --- Pascal.
+    \item $\sum_{r=0}^{n} C(n,r) = 2^n$.
+    \item Stars and bars: $x_1+\dots+x_k=n$, $x_i \ge 0$
+          $\rightarrow C(n+k-1,\,k-1)$.
+    \item Catalan: $C_n = \frac{1}{n+1}\binom{2n}{n}$ --- balanced
+          brackets, binary trees, triangulations.
+\end{itemize}
+
+\sub{Sieve of Eratosthenes}{n \log\log n}
 \begin{lstlisting}
 def sieve(n):
-    is_prime = [True] * (n + 1)
-    is_prime[0:2] = [False, False]
-    primes = []
-    for i in range(2, n + 1):
+    is_prime = bytearray([1]) * (n + 1)
+    is_prime[0:2] = b'\x00\x00'
+    for i in range(2, isqrt(n) + 1):
         if is_prime[i]:
-            primes.append(i)
-            if i * i <= n:
-                for j in range(i * i, n + 1, i):
-                    is_prime[j] = False
+            # slice assignment: the loop runs in C
+            is_prime[i*i::i] = bytearray(
+                len(is_prime[i*i::i]))
+    primes = [i for i in range(2, n + 1) if is_prime[i]]
     return is_prime, primes
-
-def factorize(x, primes):
-    f = []
-    for p in primes:
-        if p * p > x:
-            break
-        while x % p == 0:
-            f.append(p)
-            x //= p
-    if x > 1:
-        f.append(x)
-    return f
 \end{lstlisting}
-\end{cpblock}
+\tip{The slice assignment is what makes this fast in Python. A plain
+inner \code{for} loop is several times slower, and
+\code{bytearray} uses 1 byte per entry instead of 8.}
 
-\begin{cpblock}{Linear SPF Sieve + Factorization}
+\sub{Linear Sieve with SPF}{n}
 \begin{lstlisting}
-def linear_sieve_spf(n):
+def linear_sieve(n):
     spf = [0] * (n + 1)
     primes = []
     for i in range(2, n + 1):
@@ -403,20 +748,62 @@ def linear_sieve_spf(n):
             spf[i * p] = p
     return spf, primes
 
-def factorize_spf(x, spf):
+def factorize_spf(x, spf):     # O(log x) after the sieve
     f = []
     while x > 1:
         f.append(spf[x])
         x //= spf[x]
     return f
 \end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Euler's Totient Function}
+\sub{Trial Division Factorization}{\sqrt n}
 \begin{lstlisting}
-def phi_single(n):
-    res = n
+def factorize(x):
+    f = []                      # (prime, exponent) pairs
     p = 2
+    while p * p <= x:
+        if x % p == 0:
+            e = 0
+            while x % p == 0:
+                x //= p
+                e += 1
+            f.append((p, e))
+        p += 1
+    if x > 1:
+        f.append((x, 1))
+    return f
+\end{lstlisting}
+
+\sub{All Divisors}{\sqrt n}
+\begin{lstlisting}
+def divisors(n):
+    small, large = [], []
+    for i in range(1, isqrt(n) + 1):
+        if n % i == 0:
+            small.append(i)
+            if i != n // i:
+                large.append(n // i)
+    return small + large[::-1]     # already sorted
+\end{lstlisting}
+\textbf{From $n=\prod p_i^{e_i}$:}
+\begin{itemize}
+    \item Number of divisors: $\prod (e_i + 1)$.
+    \item Sum of divisors: $\prod \frac{p_i^{e_i+1}-1}{p_i-1}$.
+\end{itemize}
+
+\sub{Divisor Sieve}{n \log n}
+\begin{lstlisting}
+divs = [[] for _ in range(n + 1)]
+for i in range(1, n + 1):
+    for j in range(i, n + 1, i):
+        divs[j].append(i)
+\end{lstlisting}
+
+\subsection{Euler's Totient Function}
+$\phi(n)$ counts integers in $[1,n]$ coprime to $n$.
+\begin{lstlisting}
+def phi_single(n):             # O(sqrt n)
+    res, p = n, 2
     while p * p <= n:
         if n % p == 0:
             while n % p == 0:
@@ -426,334 +813,859 @@ def phi_single(n):
     if n > 1:
         res -= res // n
     return res
-\end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Totient Sieve}
-\begin{lstlisting}
-def phi_sieve(n):
+def phi_sieve(n):              # O(n log log n)
     phi = list(range(n + 1))
     for i in range(2, n + 1):
-        if phi[i] == i:  # prime
+        if phi[i] == i:        # i is prime
             for j in range(i, n + 1, i):
                 phi[j] -= phi[j] // i
     return phi
 \end{lstlisting}
-\end{cpblock}
+\uses{Euler's theorem: $a^{\phi(m)} \equiv 1 \pmod m$ when
+$\gcd(a,m) = 1$ --- how you reduce enormous exponents modulo a
+composite.}
 
-\begin{cpblock}{Notable Sums}
-\[
-\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
-\]
-\[
-\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}
-\]
+\sub{Miller-Rabin Primality}{k \log^3 n}
 \begin{lstlisting}
-sum_1_to_n = n * (n + 1) // 2
-sum_squares = n * (n + 1) * (2 * n + 1) // 6
+def is_prime(n):
+    if n < 2:
+        return False
+    for p in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
+        if n % p == 0:
+            return n == p
+
+    d, s = n - 1, 0
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+
+    for a in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(s - 1):
+            x = x * x % n
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
 \end{lstlisting}
-\end{cpblock}
+\uses{deterministic for every 64-bit \code{n} with this witness set.}
+\tip{The \code{for/else} is doing real work: \code{else} runs only when
+the loop finished without \code{break}, i.e. no witness cleared \code{a}.}
 
-\newpage
-
-% =========================
-\section{Modular Arithmetic and Combinatorics}
-% =========================
-\begin{cpblock}{Binary Exponentiation}
-Python already has optimized modular exponentiation through \code{pow(a,b,mod)}.
+\sub{Pollard's Rho Factorization}{n^{1/4}}
 \begin{lstlisting}
-def binpow(a, b, mod):
-    res = 1
-    a %= mod
-    while b:
-        if b & 1:
-            res = res * a % mod
-        a = a * a % mod
-        b >>= 1
-    return res
+import random
+from math import gcd
 
-ans = pow(a, b, MOD)
+def pollard(n):
+    if n % 2 == 0:
+        return 2
+    while True:
+        x = random.randrange(2, n)
+        y, c, d = x, random.randrange(1, n), 1
+        while d == 1:
+            x = (x * x + c) % n
+            y = (y * y + c) % n
+            y = (y * y + c) % n
+            d = gcd(abs(x - y), n)
+        if d != n:
+            return d
+
+def factor(n):
+    if n == 1:
+        return []
+    if is_prime(n):
+        return [n]
+    d = pollard(n)
+    return factor(d) + factor(n // d)
 \end{lstlisting}
-\end{cpblock}
+\uses{factoring values up to $10^{18}$ where trial division would take
+hours.}
 
-\begin{cpblock}{Modular Inverse}
-Works when \code{MOD} is prime and \code{a} is not divisible by \code{MOD}.
+\sub{Chinese Remainder Theorem}{\log m}
 \begin{lstlisting}
-def mod_inverse(a, mod):
-    return pow(a, mod - 2, mod)
+def crt(a1, m1, a2, m2):
+    g, p, _ = extgcd(m1, m2)
+    if (a2 - a1) % g:
+        return None                 # incompatible
+    lcm = m1 // g * m2
+    t = (a2 - a1) // g * p % (m2 // g)
+    return (a1 + t * m1) % lcm, lcm
 \end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Modulo Properties}
-\[
-(a+b)\bmod m=((a\bmod m)+(b\bmod m))\bmod m
-\]
-\[
-(a-b)\bmod m=((a\bmod m)-(b\bmod m))\bmod m
-\]
-\[
-(a\cdot b)\bmod m=((a\bmod m)(b\bmod m))\bmod m
-\]
-In Python, \code{x \% MOD} already returns a non-negative result for positive \code{MOD}.
-\end{cpblock}
-
-\begin{cpblock}{Modular Factorials}
+\sub{Matrix Exponentiation}{k^3 \log n}
 \begin{lstlisting}
-MOD = 998244353
-MAXN = 10**6 + 5
-fact = [1] * MAXN
+def mat_mul(A, B, mod=MOD):
+    n, m, k = len(A), len(B[0]), len(B)
+    C = [[0] * m for _ in range(n)]
+    for i in range(n):
+        Ai, Ci = A[i], C[i]
+        for p in range(k):
+            if Ai[p]:
+                v, Bp = Ai[p], B[p]
+                for j in range(m):
+                    Ci[j] = (Ci[j] + v * Bp[j]) % mod
+    return C
 
-for i in range(1, MAXN):
-    fact[i] = fact[i - 1] * i % MOD
+def mat_pow(A, e, mod=MOD):
+    n = len(A)
+    R = [[int(i == j) for j in range(n)] for i in range(n)]
+    while e:
+        if e & 1:
+            R = mat_mul(R, A, mod)
+        A = mat_mul(A, A, mod)
+        e >>= 1
+    return R
 \end{lstlisting}
-\end{cpblock}
+\uses{any linear recurrence at a huge index. Fibonacci:
+$\begin{pmatrix}1&1\\1&0\end{pmatrix}^n$ yields $F_n$ in $O(\log n)$.}
 
-\begin{cpblock}{Modular Combinations}
+\subsection{Notable Sums}
+\[\sum_{i=1}^{n} i = \frac{n(n+1)}{2} \qquad
+  \sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}\]
+\[\sum_{i=1}^{n} i^3 = \left(\frac{n(n+1)}{2}\right)^2 \qquad
+  \sum_{i=0}^{n} r^i = \frac{r^{n+1}-1}{r-1}\]
 \begin{lstlisting}
-def nCr(n, r):
-    if r < 0 or r > n:
-        return 0
-    return fact[n] * pow(fact[r], MOD - 2, MOD) % MOD * pow(fact[n - r], MOD - 2, MOD) % MOD
+s1 = n * (n + 1) // 2
+s2 = n * (n + 1) * (2 * n + 1) // 6
+s3 = (n * (n + 1) // 2) ** 2
 \end{lstlisting}
-\[
-C(n,r)=\frac{n!}{r!(n-r)!}
-\qquad
-P(n,r)=\frac{n!}{(n-r)!}
-\]
-\end{cpblock}
+\warn{Use \code{//}, not \code{/}. True division returns a float and
+loses precision past $2^{53}$.}
 
-\begin{cpblock}{Precomputed Inverse Factorials}
-Faster when there are many queries.
+\end{multicols}
+
+% =====================================================================
+\section{Arrays, Prefix Sums and Searching}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Prefix Sum 1D}{n \text{ build},\; 1 \text{ query}}
 \begin{lstlisting}
-fact = [1] * (MAXN + 1)
-invfact = [1] * (MAXN + 1)
+from itertools import accumulate
 
-for i in range(1, MAXN + 1):
-    fact[i] = fact[i - 1] * i % MOD
+pref = [0] + list(accumulate(a))     # fastest
 
-invfact[MAXN] = pow(fact[MAXN], MOD - 2, MOD)
-for i in range(MAXN, 0, -1):
-    invfact[i - 1] = invfact[i] * i % MOD
-
-def comb(n, r):
-    if r < 0 or r > n:
-        return 0
-    return fact[n] * invfact[r] % MOD * invfact[n - r] % MOD
+def range_sum(l, r):        # inclusive, 0-indexed
+    return pref[r + 1] - pref[l]
 \end{lstlisting}
-\end{cpblock}
-
-\newpage
-
-% =========================
-\section{Prefix Sums and Difference Arrays}
-% =========================
-\begin{cpblock}{Prefix Sum 1D}
+\tip{\code{accumulate} runs in C. The manual loop below is identical in
+meaning but noticeably slower:}
 \begin{lstlisting}
 pref = [0] * (n + 1)
 for i in range(n):
     pref[i + 1] = pref[i] + a[i]
-
-def range_sum(l, r):  # inclusive, 0-indexed
-    return pref[r + 1] - pref[l]
 \end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Prefix XOR}
+\subsection{Prefix XOR}
 \begin{lstlisting}
-px = [0] * (n + 1)
-for i in range(n):
-    px[i + 1] = px[i] ^ a[i]
+from operator import xor
+px = [0] + list(accumulate(a, xor))
 
 def range_xor(l, r):
     return px[r + 1] ^ px[l]
 \end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Prefix Sum 2D}
+\sub{Prefix Sum 2D}{nm \text{ build},\; 1 \text{ query}}
 \begin{lstlisting}
 p = [[0] * (m + 1) for _ in range(n + 1)]
-
 for i in range(1, n + 1):
+    row, prev, cur = a[i - 1], p[i - 1], p[i]
     for j in range(1, m + 1):
-        p[i][j] = a[i - 1][j - 1] + p[i - 1][j] + p[i][j - 1] - p[i - 1][j - 1]
+        cur[j] = row[j-1] + prev[j] + cur[j-1] - prev[j-1]
 
-def rect_sum(x1, y1, x2, y2):
-    # inclusive, 0-indexed
+def rect_sum(x1, y1, x2, y2):      # inclusive, 0-indexed
     x1 += 1; y1 += 1; x2 += 1; y2 += 1
-    return p[x2][y2] - p[x1 - 1][y2] - p[x2][y1 - 1] + p[x1 - 1][y1 - 1]
+    return (p[x2][y2] - p[x1-1][y2]
+            - p[x2][y1-1] + p[x1-1][y1-1])
 \end{lstlisting}
-\end{cpblock}
+\tip{Binding \code{p[i-1]} and \code{p[i]} to locals before the inner
+loop removes two index lookups per iteration --- a real speedup in
+CPython.}
 
-\begin{cpblock}{Difference Array}
-Range update $[l,r]$ with value $v$.
+\sub{Difference Array 1D}{1 \text{ per update}}
 \begin{lstlisting}
 d = [0] * (n + 1)
 
-def add_range(l, r, v):
+def add_range(l, r, v):        # inclusive
     d[l] += v
-    if r + 1 < len(d):
+    if r + 1 <= n:
         d[r + 1] -= v
 
+# Rebuild once, at the end
 cur = 0
 for i in range(n):
     cur += d[i]
     a[i] += cur
 \end{lstlisting}
-\end{cpblock}
+\uses{many range updates, one read at the end. The exact mirror of a
+prefix sum.}
 
-\newpage
+\subsection{Difference Array 2D}
+\begin{lstlisting}
+d = [[0] * (m + 2) for _ in range(n + 2)]
 
-% =========================
+def add_rect(x1, y1, x2, y2, v):
+    d[x1][y1]     += v
+    d[x1][y2 + 1] -= v
+    d[x2 + 1][y1] -= v
+    d[x2 + 1][y2 + 1] += v
+# Then take a 2D prefix sum of d
+\end{lstlisting}
+
+\sub{Binary Search}{\log n}
+\begin{lstlisting}
+l, r, ans = 0, n - 1, -1
+while l <= r:
+    mid = (l + r) // 2
+    if a[mid] == x:
+        ans = mid
+        break
+    if a[mid] < x:
+        l = mid + 1
+    else:
+        r = mid - 1
+\end{lstlisting}
+\uses{Python integers never overflow, so \code{(l + r) // 2} is safe
+here --- unlike in C++.}
+
+\sub{Binary Search on the Answer}{\log(\text{range}) \cdot f}
+\begin{lstlisting}
+lo, hi, ans = 0, 10**18, -1
+while lo <= hi:
+    mid = (lo + hi) // 2
+    if check(mid):
+        ans = mid
+        hi = mid - 1
+    else:
+        lo = mid + 1
+\end{lstlisting}
+\uses{"minimise the maximum", "maximise the minimum", and anything with
+a monotone predicate.}
+
+\subsection{First True Pattern}
+\begin{lstlisting}
+lo, hi = 0, n              # half-open [lo, hi)
+while lo < hi:
+    mid = (lo + hi) // 2
+    if ok(mid):
+        hi = mid
+    else:
+        lo = mid + 1
+# lo == first index where ok() holds, or n
+\end{lstlisting}
+\tip{Far harder to get wrong than the \code{l <= r} form. Learn this one
+shape and reuse it.}
+
+\subsection{Binary Search on Floats}
+\begin{lstlisting}
+lo, hi = 0.0, 1e9
+for _ in range(100):           # fixed iteration count
+    mid = (lo + hi) / 2
+    if check(mid):
+        hi = mid
+    else:
+        lo = mid
+\end{lstlisting}
+\tip{A fixed count cannot loop forever, and 100 halvings exceed any
+precision a problem will ask for.}
+
+\sub{bisect}{\log n}
+\begin{lstlisting}
+from bisect import bisect_left, bisect_right, insort
+
+i = bisect_left(a, x)     # first index with a[i] >= x
+j = bisect_right(a, x)    # first index with a[i] > x
+
+count_x = bisect_right(a, x) - bisect_left(a, x)
+exists  = i < len(a) and a[i] == x
+
+# Largest element <= x
+k = bisect_right(a, x) - 1
+if k >= 0:
+    val = a[k]
+
+insort(a, x)              # insert, keeping sorted: O(n)
+\end{lstlisting}
+\warn{\code{insort} searches in $O(\log n)$ but \emph{shifts} in $O(n)$.
+For many insertions use a heap, a BIT, or offline sorting.}
+\tip{\code{bisect} takes a \code{key=} argument in 3.10+. On older
+judges, search a separate list of keys.}
+
+\sub{Ternary Search}{\log(\text{range})}
+\begin{lstlisting}
+lo, hi = 0.0, 1e9
+for _ in range(200):
+    m1 = lo + (hi - lo) / 3
+    m2 = hi - (hi - lo) / 3
+    if f(m1) < f(m2):      # maximising
+        lo = m1
+    else:
+        hi = m2
+best = f(lo)
+\end{lstlisting}
+\uses{strictly unimodal functions --- one peak, no flat stretch.}
+
+\sub{Two Pointers}{n}
+\begin{lstlisting}
+l = 0
+cur = 0
+best = 0
+for r in range(n):
+    cur += a[r]                 # extend
+    while cur > K:              # shrink while invalid
+        cur -= a[l]
+        l += 1
+    best = max(best, r - l + 1)
+\end{lstlisting}
+\warn{Requires monotonicity: once the window is invalid, extending right
+must not make it valid again.}
+
+\sub{Sliding Window Maximum}{n}
+\begin{lstlisting}
+from collections import deque
+
+def window_max(a, k):
+    dq, res = deque(), []       # dq holds indices
+    for i, x in enumerate(a):
+        if dq and dq[0] <= i - k:
+            dq.popleft()        # left the window
+        while dq and a[dq[-1]] <= x:
+            dq.pop()            # dominated
+        dq.append(i)
+        if i >= k - 1:
+            res.append(a[dq[0]])
+    return res
+\end{lstlisting}
+\tip{The deque stays decreasing, so the front is the window maximum.
+Flip the comparison for a minimum.}
+
+\sub{Kadane: Max Subarray Sum}{n}
+\begin{lstlisting}
+def kadane(a):
+    best = cur = a[0]
+    for x in a[1:]:
+        cur = max(x, cur + x)
+        best = max(best, cur)
+    return best
+\end{lstlisting}
+\warn{Seeding \code{best = 0} silently returns 0 on all-negative input.
+Seed from \code{a[0]}.}
+
+\sub{LIS}{n \log n}
+\begin{lstlisting}
+from bisect import bisect_left, bisect_right
+
+def lis_length(a):
+    t = []
+    for x in a:
+        i = bisect_left(t, x)
+        if i == len(t):
+            t.append(x)
+        else:
+            t[i] = x
+    return len(t)
+\end{lstlisting}
+\warn{\code{t} is not the LIS itself --- only its length is meaningful.
+Reconstruct with parent pointers:}
+\begin{lstlisting}
+def lis_reconstruct(a):
+    t, pos, par = [], [], [-1] * len(a)
+    for i, x in enumerate(a):
+        j = bisect_left(t, x)
+        if j > 0:
+            par[i] = pos[j - 1]
+        if j == len(t):
+            t.append(x); pos.append(i)
+        else:
+            t[j] = x;   pos[j] = i
+
+    res, i = [], pos[-1]
+    while i != -1:
+        res.append(a[i])
+        i = par[i]
+    return res[::-1]
+\end{lstlisting}
+\tip{Use \code{bisect\_right} for the longest \emph{non-decreasing}
+subsequence.}
+
+\sub{Coordinate Compression}{n \log n}
+\begin{lstlisting}
+vals = sorted(set(a))
+comp = {x: i for i, x in enumerate(vals)}
+b = [comp[x] for x in a]
+# vals[i] recovers the original value
+\end{lstlisting}
+\uses{values up to $10^9$ but only $10^5$ distinct ones --- compress to
+$[0,n)$ so they can index a BIT or segment tree.}
+
+\sub{Counting Inversions}{n \log n}
+\begin{lstlisting}
+def count_inversions(a):
+    vals = sorted(set(a))
+    comp = {x: i + 1 for i, x in enumerate(vals)}
+    bit = Fenwick(len(vals))
+    inv = 0
+    for x in reversed(a):
+        c = comp[x]
+        inv += bit.sum(c - 1)    # already-seen smaller
+        bit.add(c, 1)
+    return inv
+\end{lstlisting}
+\uses{the minimum number of adjacent swaps that sorts the array.}
+
+\sub{Monotonic Stack}{n}
+\begin{lstlisting}
+# Next strictly greater element to the right
+def next_greater(a):
+    n = len(a)
+    res, st = [-1] * n, []       # st holds indices
+    for i, x in enumerate(a):
+        while st and a[st[-1]] < x:
+            res[st.pop()] = i
+        st.append(i)
+    return res
+\end{lstlisting}
+\uses{previous/next greater or smaller, largest rectangle in a
+histogram, sum of subarray minimums.}
+
+\end{multicols}
+
+% =====================================================================
 \section{Bit Manipulation}
-% =========================
-\begin{cpblock}{Basic Operations}
-\begin{lstlisting}
-mask | (1 << i)       # set bit i
-mask & (1 << i)       # check bit i
-mask ^ (1 << i)       # toggle bit i
-mask & ~(1 << i)      # clear bit i
-\end{lstlisting}
-\end{cpblock}
+% =====================================================================
+\begin{multicols}{2}
 
-\begin{cpblock}{Least Significant Bit}
+\subsection{Basic Operations}
 \begin{lstlisting}
-mask & -mask          # isolate LSB
-mask & (mask - 1)     # remove LSB
-\end{lstlisting}
-\end{cpblock}
+mask |  (1 << i)       # set bit i
+mask &  (1 << i)       # test bit i (nonzero if set)
+mask ^  (1 << i)       # toggle bit i
+mask & ~(1 << i)       # clear bit i
 
-\begin{cpblock}{Python Bit Built-ins}
+(mask >> i) & 1        # test, as a clean 0/1
+\end{lstlisting}
+\uses{Python integers are arbitrary width, so \code{1 << 200} is fine.
+None of the C++ \code{1LL} caveats apply.}
+
+\subsection{Least Significant Bit}
 \begin{lstlisting}
-x.bit_count()         # number of 1 bits
-x.bit_length()        # bits needed to represent x
-x.bit_length() - 1    # floor(log2(x)), if x > 0
+mask & -mask           # isolate the lowest set bit
+mask & (mask - 1)      # clear the lowest set bit
+mask | (mask + 1)      # set the lowest clear bit
 \end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{All Bits Set of Size n}
+\subsection{Python Bit Built-ins}
 \begin{lstlisting}
-full = (1 << n) - 1
-\end{lstlisting}
-\end{cpblock}
+x.bit_count()          # popcount, Python 3.10+
+bin(x).count('1')      # popcount, any version
+x.bit_length()         # bits needed for x
+x.bit_length() - 1     # floor(log2(x)), for x > 0
+(x & -x).bit_length() - 1   # index of the lowest set bit
 
-\begin{cpblock}{Check Power of Two}
+int('1011', 2)         # parse binary
+bin(11)                # '0b1011'
+format(11, '08b')      # '00001011'
+\end{lstlisting}
+\warn{\code{x.bit\_count()} needs 3.10. Older judges need
+\code{bin(x).count('1')}.}
+
+\subsection{Common Tricks}
 \begin{lstlisting}
-def is_power_of_two(n):
-    return n > 0 and (n & (n - 1)) == 0
+(1 << n) - 1              # n low bits all set
+n > 0 and n & (n - 1) == 0    # is a power of two
+1 << (n - 1).bit_length()     # next power of two
+x & 1                     # odd?
+x >> 1                    # floor division by 2
 \end{lstlisting}
-\end{cpblock}
+\uses{unlike C++, \code{>>} on a negative Python int is a true
+\emph{floor} shift: \code{-7 >> 1 == -4}.}
 
-\begin{cpblock}{XOR Properties}
+\subsection{XOR Properties}
 \begin{itemize}
-    \item $a \oplus a = 0$
-    \item $a \oplus 0 = a$
-    \item If $a \oplus b = c$, then $a \oplus c = b$.
+    \item $a \oplus a = 0$ and $a \oplus 0 = a$.
+    \item Commutative and associative --- order never matters.
+    \item If $a \oplus b = c$ then $a \oplus c = b$.
+    \item XOR of $1..n$ has period 4: $n, 1, n+1, 0$ for
+          $n \bmod 4 = 0,1,2,3$.
 \end{itemize}
-\end{cpblock}
+\uses{"every value appears twice except one" --- XOR everything and the
+pairs cancel.}
 
-\begin{cpblock}{Iterating All Subsets}
+\sub{Iterate All Subsets}{2^n \cdot n}
 \begin{lstlisting}
 for mask in range(1 << n):
     for j in range(n):
         if mask & (1 << j):
-            pass  # j is in subset
-\end{lstlisting}
-\end{cpblock}
+            pass          # element j is in this subset
 
-\begin{cpblock}{Iterating Submasks}
+# Or with itertools, at C speed
+from itertools import combinations
+for k in range(n + 1):
+    for sub in combinations(a, k):
+        pass
+\end{lstlisting}
+
+\sub{Iterate Submasks}{3^n \text{ total}}
 \begin{lstlisting}
 sub = mask
 while sub:
-    # sub is a submask of mask
+    # sub is a nonempty submask of mask
     sub = (sub - 1) & mask
-# excludes empty submask 0
+
+# Including the empty submask
+sub = mask
+while True:
+    # process sub
+    if sub == 0:
+        break
+    sub = (sub - 1) & mask
 \end{lstlisting}
-\end{cpblock}
+\tip{Summed over every mask this runs $3^n$ times, not $4^n$ --- which
+is what makes subset DP feasible at $n \le 20$.}
 
-\begin{cpblock}{Subsets of Size K - Gosper's Hack}
+\sub{Subsets of Size K (Gosper's Hack)}{\binom{n}{k}}
 \begin{lstlisting}
-set_mask = (1 << k) - 1
-while set_mask < (1 << n):
-    # process set_mask
-    c = set_mask & -set_mask
-    r = set_mask + c
-    set_mask = (((r ^ set_mask) >> 2) // c) | r
+cur = (1 << k) - 1
+while cur < (1 << n):
+    # process cur: exactly k bits set
+    c = cur & -cur
+    r = cur + c
+    cur = (((r ^ cur) >> 2) // c) | r
 \end{lstlisting}
-\end{cpblock}
+\warn{Use \code{//}, not \code{/}. True division returns a float and
+breaks the bit arithmetic.}
 
-\newpage
-
-% =========================
-\section{Core Graph Algorithms}
-% =========================
-\begin{cpblock}{Adjacency List}
+\sub{SOS DP (Sum over Subsets)}{2^n \cdot n}
 \begin{lstlisting}
+f = a[:]                   # f[mask] = a[mask]
+for i in range(n):
+    bit = 1 << i
+    for mask in range(1 << n):
+        if mask & bit:
+            f[mask] += f[mask ^ bit]
+# f[mask] = sum of a[sub] over every submask sub of mask
+\end{lstlisting}
+\uses{aggregating over all submasks in $O(2^n n)$ instead of $O(3^n)$.
+Reverse the condition to sum over supersets.}
+
+\sub{XOR Linear Basis}{n \log C}
+\begin{lstlisting}
+class Basis:
+    B = 60
+
+    def __init__(self):
+        self.b = [0] * (self.B + 1)
+
+    def insert(self, x):
+        for i in range(self.B, -1, -1):
+            if not (x >> i) & 1:
+                continue
+            if not self.b[i]:
+                self.b[i] = x
+                return True
+            x ^= self.b[i]
+        return False           # already representable
+
+    def max_xor(self):
+        res = 0
+        for i in range(self.B, -1, -1):
+            res = max(res, res ^ self.b[i])
+        return res
+\end{lstlisting}
+\uses{maximum XOR of a subset, counting distinct achievable XORs
+($2^{\text{rank}}$), and testing reachability of a value.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Strings}
+% =====================================================================
+\begin{multicols}{2}
+
+\subsection{Reading and Splitting}
+\begin{lstlisting}
+s = input().rstrip()           # drop the trailing newline
+a, b, c = map(int, input().split())
+nums = list(map(int, input().split()))
+
+grid = [input().rstrip() for _ in range(n)]
+\end{lstlisting}
+\warn{With \code{input = sys.stdin.readline}, the newline survives.
+Forgetting \code{.rstrip()} makes string comparisons fail in ways that
+are painful to spot.}
+
+\subsection{String Utilities}
+\begin{lstlisting}
+s[l:r]                 # chars l .. r-1  (r excluded)
+s[::-1]                # reversed
+s.find("abc")          # -1 when absent
+s.count("ab")          # non-overlapping occurrences
+s.replace("a", "b")
+s.startswith("ab") ; s.endswith("z")
+"-".join(words)
+"".join(sorted(s))     # anagram normal form
+
+ord('a')               # 97
+chr(97)                # 'a'
+ord(c) - ord('a')      # 0..25 index
+s.isalpha() ; s.isdigit() ; s.islower()
+s.upper() ; s.lower()
+\end{lstlisting}
+\warn{Strings are immutable. Building one with \code{s += ch} in a loop
+is $O(n^2)$ --- append to a list and \code{"".join()} once.}
+
+\subsection{Character Frequency}
+\begin{lstlisting}
+from collections import Counter
+
+freq = Counter(s)
+is_anagram = Counter(a) == Counter(b)
+
+cnt = [0] * 26                # faster than Counter
+for ch in s:
+    cnt[ord(ch) - 97] += 1
+\end{lstlisting}
+
+\sub{Z-Function}{n}
+\code{z[i]} = length of the longest common prefix of \code{s} and
+\code{s[i:]}.
+\begin{lstlisting}
+def z_function(s):
+    n = len(s)
+    z = [0] * n
+    l = r = 0
+    for i in range(1, n):
+        if i <= r:
+            z[i] = min(r - i + 1, z[i - l])
+        while i + z[i] < n and s[z[i]] == s[i + z[i]]:
+            z[i] += 1
+        if i + z[i] - 1 > r:
+            l, r = i, i + z[i] - 1
+    return z
+
+def z_search(text, pat):
+    s = pat + '#' + text        # '#' occurs in neither
+    z = z_function(s)
+    m = len(pat)
+    return [i - m - 1
+            for i in range(m + 1, len(s)) if z[i] == m]
+\end{lstlisting}
+\warn{The separator must not occur in either string, or matches can
+straddle the join.}
+
+\sub{KMP Prefix Function}{n}
+\code{pi[i]} = longest proper prefix of \code{s[:i+1]} that is also a
+suffix of it.
+\begin{lstlisting}
+def prefix_function(s):
+    n = len(s)
+    pi = [0] * n
+    for i in range(1, n):
+        j = pi[i - 1]
+        while j > 0 and s[i] != s[j]:
+            j = pi[j - 1]
+        if s[i] == s[j]:
+            j += 1
+        pi[i] = j
+    return pi
+
+def kmp_search(text, pat):
+    s = pat + '#' + text
+    pi = prefix_function(s)
+    m = len(pat)
+    return [i - 2 * m
+            for i in range(m + 1, len(s)) if pi[i] == m]
+\end{lstlisting}
+\uses{\code{n - pi[n-1]} is the smallest period of the string; it repeats
+exactly when that period divides \code{n}.}
+\tip{For plain substring search with no extra structure needed,
+\code{text.find(pat)} is implemented in C and beats a Python KMP.}
+
+\sub{Manacher}{n}
+\begin{lstlisting}
+def manacher_odd(s):        # d1[i] = odd radius at i
+    n = len(s)
+    d1 = [0] * n
+    l, r = 0, -1
+    for i in range(n):
+        k = 1 if i > r else min(d1[l + r - i], r - i + 1)
+        while 0 <= i - k and i + k < n and s[i-k] == s[i+k]:
+            k += 1
+        d1[i] = k
+        if i + k - 1 > r:
+            l, r = i - k + 1, i + k - 1
+    return d1
+
+def manacher_even(s):       # d2[i] = even radius at i-1|i
+    n = len(s)
+    d2 = [0] * n
+    l, r = 0, -1
+    for i in range(n):
+        k = 0 if i > r else min(d2[l + r - i + 1], r - i + 1)
+        while (0 <= i - k - 1 and i + k < n
+               and s[i - k - 1] == s[i + k]):
+            k += 1
+        d2[i] = k
+        if i + k - 1 > r:
+            l, r = i - k, i + k - 1
+    return d2
+
+def longest_palindrome(s):
+    d1, d2 = manacher_odd(s), manacher_even(s)
+    return max(max((2 * x - 1) for x in d1),
+               max((2 * x) for x in d2), default=0)
+\end{lstlisting}
+\uses{the total number of palindromic substrings is
+$\sum d1[i] + \sum d2[i]$.}
+
+\sub{String Hashing}{n \text{ build},\; 1 \text{ per substring}}
+\begin{lstlisting}
+import random
+
+class Hash:
+    def __init__(self, s, mod=(1 << 61) - 1):
+        self.mod = mod
+        self.B = random.randrange(256, mod - 1)
+        n = len(s)
+        self.h = [0] * (n + 1)
+        self.p = [1] * (n + 1)
+        for i, ch in enumerate(s):
+            self.h[i+1] = (self.h[i] * self.B + ord(ch)) % mod
+            self.p[i+1] = self.p[i] * self.B % mod
+
+    def get(self, l, r):        # inclusive [l, r]
+        return (self.h[r+1]
+                - self.h[l] * self.p[r-l+1]) % self.mod
+\end{lstlisting}
+\uses{$O(1)$ substring comparison, so the longest common prefix of two
+suffixes takes $O(\log n)$ by binary search.}
+\warn{Randomise the base --- a fixed base and a small modulus is
+trivially hacked. Python's big integers make $2^{61}-1$ effortless here;
+no \code{\_\_int128} trickery needed.}
+
+\sub{Trie}{|s| \text{ per operation}}
+\begin{lstlisting}
+class Trie:
+    def __init__(self):
+        self.nxt = [{}]         # node -> {char: node}
+        self.cnt = [0]          # words ending at node
+
+    def _new(self):
+        self.nxt.append({})
+        self.cnt.append(0)
+        return len(self.nxt) - 1
+
+    def insert(self, s):
+        v = 0
+        for ch in s:
+            if ch not in self.nxt[v]:
+                self.nxt[v][ch] = self._new()
+            v = self.nxt[v][ch]
+        self.cnt[v] += 1
+
+    def contains(self, s):
+        v = 0
+        for ch in s:
+            if ch not in self.nxt[v]:
+                return False
+            v = self.nxt[v][ch]
+        return self.cnt[v] > 0
+\end{lstlisting}
+\uses{prefix queries, autocomplete, and --- over the bits of each number
+--- maximum XOR pair queries.}
+\tip{Flat lists indexed by node id beat a class-per-node design in
+Python: fewer objects, far less allocation.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Graphs: Traversal and Ordering}
+% =====================================================================
+\begin{multicols}{2}
+
+\subsection{Representations}
+\begin{lstlisting}
+# Adjacency list, 0-indexed
 adj = [[] for _ in range(n)]
-
-# undirected edge
 adj[u].append(v)
-adj[v].append(u)
+adj[v].append(u)            # omit if directed
 
-# directed edge
-adj[u].append(v)
+# Weighted
+wadj = [[] for _ in range(n)]
+wadj[u].append((v, w))
+
+# Edge list: Kruskal, Bellman-Ford
+edges = []                  # (w, u, v)
+
+# Sparse / non-integer labels
+from collections import defaultdict
+adj = defaultdict(list)
 \end{lstlisting}
-\end{cpblock}
+\warn{\code{[[]] * n} makes $n$ references to one list. Use the
+comprehension.}
 
-\begin{cpblock}{DFS Recursive}
+\subsection{Graph Identities}
+\begin{itemize}
+    \item Tree on $n$ nodes: exactly $n-1$ edges, connected, acyclic.
+    \item Complete graph $K_n$: $\frac{n(n-1)}{2}$ edges.
+    \item Handshake lemma: $\sum_v \deg(v) = 2|E|$.
+    \item Euler circuit iff every degree is even; Euler path iff exactly
+          two degrees are odd.
+    \item Bipartite iff no odd-length cycle.
+\end{itemize}
+
+\sub{DFS (Iterative)}{V + E}
 \begin{lstlisting}
-import sys
-sys.setrecursionlimit(1_000_000)
-
-vis = [False] * n
-
-def dfs(u):
-    vis[u] = True
-    for v in adj[u]:
-        if not vis[v]:
-            dfs(v)
-\end{lstlisting}
-\end{cpblock}
-
-\begin{cpblock}{DFS Iterative}
-Safer when recursion depth is dangerous.
-\begin{lstlisting}
-def dfs_iter(start):
+def dfs(s, adj, n):
     vis = [False] * n
-    stack = [start]
-    vis[start] = True
-    while stack:
-        u = stack.pop()
-        for v in adj[u]:
-            if not vis[v]:
-                vis[v] = True
-                stack.append(v)
-    return vis
-\end{lstlisting}
-\end{cpblock}
-
-\begin{cpblock}{BFS}
-\begin{lstlisting}
-from collections import deque
-
-def bfs(s):
-    vis = [False] * n
-    q = deque([s])
+    st = [s]
     vis[s] = True
-    while q:
-        u = q.popleft()
+    while st:
+        u = st.pop()
         for v in adj[u]:
             if not vis[v]:
                 vis[v] = True
-                q.append(v)
+                st.append(v)
     return vis
 \end{lstlisting}
-\end{cpblock}
+\tip{Mark on \emph{push}, not on pop, or a node can be stacked many
+times.}
+\warn{Prefer this over recursion in Python. Recursive DFS on $10^5$
+nodes will hit the recursion limit or blow the C stack.}
 
-\begin{cpblock}{BFS Distances}
+\subsection{DFS with Entry and Exit}
+\begin{lstlisting}
+# When you need post-order work (subtree sizes, etc.)
+def dfs_order(root, adj, n):
+    par = [-1] * n
+    order = []
+    st = [root]
+    seen = [False] * n
+    seen[root] = True
+    while st:
+        u = st.pop()
+        order.append(u)
+        for v in adj[u]:
+            if not seen[v]:
+                seen[v] = True
+                par[v] = u
+                st.append(v)
+    return order, par
+    # Iterate reversed(order) for post-order processing
+\end{lstlisting}
+\tip{This is the standard workaround for tree DP without recursion:
+walk \code{reversed(order)} and every child is already finished.}
+
+\sub{BFS and Distances}{V + E}
 \begin{lstlisting}
 from collections import deque
 
-def bfs_dist(s):
+def bfs(s, adj, n):
     dist = [-1] * n
     q = deque([s])
     dist[s] = 0
@@ -765,41 +1677,73 @@ def bfs_dist(s):
                 q.append(v)
     return dist
 \end{lstlisting}
-\end{cpblock}
+\uses{shortest paths on \emph{unweighted} graphs. \code{dist[v] == -1}
+doubles as the visited flag.}
 
-\begin{cpblock}{Grid Directions}
+\subsection{Multi-Source BFS}
 \begin{lstlisting}
-dx = [-1, 1, 0, 0]
-dy = [0, 0, -1, 1]
-
-for k in range(4):
-    nx = x + dx[k]
-    ny = y + dy[k]
-    if 0 <= nx < R and 0 <= ny < C:
-        pass
+q = deque()
+for s in sources:
+    dist[s] = 0
+    q.append(s)
+# ... the same BFS loop from here
 \end{lstlisting}
-\end{cpblock}
+\uses{"distance to the nearest fire / gate / exit". One pass beats one
+BFS per source.}
 
-\begin{cpblock}{Graph Properties}
-\begin{itemize}
-    \item Tree edges: $n-1$.
-    \item Complete graph edges: $\frac{n(n-1)}{2}$.
-    \item Handshaking lemma: $\sum deg(v)=2|E|$.
-\end{itemize}
-\end{cpblock}
-
-\newpage
-
-% =========================
-\section{Graph Coloring and Cycle Detection}
-% =========================
-\begin{cpblock}{Bipartite Coloring}
-2-color an undirected graph. If impossible, the graph is not bipartite.
+\sub{0-1 BFS}{V + E}
 \begin{lstlisting}
 from collections import deque
 
-def bipartite_color(adj):
-    n = len(adj)
+def bfs01(s, wadj, n):
+    dist = [float('inf')] * n
+    dist[s] = 0
+    dq = deque([s])
+    while dq:
+        u = dq.popleft()
+        for v, w in wadj[u]:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                if w == 0:
+                    dq.appendleft(v)
+                else:
+                    dq.append(v)
+    return dist
+\end{lstlisting}
+\uses{Dijkstra without the $\log$ when every weight is 0 or 1.}
+
+\subsection{Grid Traversal}
+\begin{lstlisting}
+DIRS4 = ((-1, 0), (1, 0), (0, -1), (0, 1))
+DIRS8 = ((-1,-1), (-1,0), (-1,1), (0,-1),
+         (0,1), (1,-1), (1,0), (1,1))
+
+for dx, dy in DIRS4:
+    nx, ny = x + dx, y + dy
+    if not (0 <= nx < R and 0 <= ny < C):
+        continue
+    if grid[nx][ny] == '#':
+        continue
+    # ...
+\end{lstlisting}
+\tip{Flatten a cell to \code{x * C + y} when you need a single integer
+id (for a DSU or a flat \code{dist} list). It is faster than tuples.}
+
+\sub{Connected Components}{V + E}
+\begin{lstlisting}
+comp = [-1] * n
+c = 0
+for i in range(n):
+    if comp[i] == -1:
+        # BFS or iterative DFS from i, labelling comp[] = c
+        c += 1
+\end{lstlisting}
+
+\sub{Bipartite Check}{V + E}
+\begin{lstlisting}
+from collections import deque
+
+def bipartite(adj, n):
     color = [-1] * n
     for s in range(n):
         if color[s] != -1:
@@ -816,13 +1760,12 @@ def bipartite_color(adj):
                     return False, color
     return True, color
 \end{lstlisting}
-\end{cpblock}
+\warn{Loop over every start node --- checking only node 0 misses
+disconnected components.}
 
-\begin{cpblock}{Greedy Graph Coloring}
-Assigns a valid coloring, not necessarily minimum.
+\sub{Greedy Coloring}{V + E}
 \begin{lstlisting}
-def greedy_coloring(adj):
-    n = len(adj)
+def greedy_coloring(adj, n):
     color = [-1] * n
     for u in range(n):
         used = {color[v] for v in adj[u] if color[v] != -1}
@@ -832,100 +1775,187 @@ def greedy_coloring(adj):
         color[u] = c
     return color
 \end{lstlisting}
-\end{cpblock}
+\warn{Valid, but not minimal. Minimum graph coloring is NP-hard.}
 
-\begin{cpblock}{Cycle Detection - Undirected Graph}
+\sub{Cycle in an Undirected Graph}{V + E}
 \begin{lstlisting}
-def has_cycle_undirected(adj):
-    n = len(adj)
+def has_cycle_undirected(adj, n):
     vis = [False] * n
-
-    def dfs(u, parent):
-        vis[u] = True
-        for v in adj[u]:
-            if not vis[v]:
-                if dfs(v, u):
+    for s in range(n):
+        if vis[s]:
+            continue
+        st = [(s, -1)]
+        vis[s] = True
+        while st:
+            u, p = st.pop()
+            for v in adj[u]:
+                if not vis[v]:
+                    vis[v] = True
+                    st.append((v, u))
+                elif v != p:
                     return True
-            elif v != parent:
-                return True
-        return False
-
-    for i in range(n):
-        if not vis[i] and dfs(i, -1):
-            return True
+        # note: with multi-edges, track edge ids instead
     return False
 \end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Cycle Detection - Directed Graph}
-Use states: 0 = unvisited, 1 = visiting, 2 = done.
+\sub{Cycle in a Directed Graph}{V + E}
 \begin{lstlisting}
-def has_cycle_directed(adj):
-    n = len(adj)
+# 0 = unvisited, 1 = on the current path, 2 = done
+def has_cycle_directed(adj, n):
     state = [0] * n
-
-    def dfs(u):
-        state[u] = 1
-        for v in adj[u]:
-            if state[v] == 1:
-                return True
-            if state[v] == 0 and dfs(v):
-                return True
-        state[u] = 2
-        return False
-
-    for i in range(n):
-        if state[i] == 0 and dfs(i):
-            return True
+    for s in range(n):
+        if state[s]:
+            continue
+        st = [(s, iter(adj[s]))]
+        state[s] = 1
+        while st:
+            u, it = st[-1]
+            found = False
+            for v in it:
+                if state[v] == 1:
+                    return True
+                if state[v] == 0:
+                    state[v] = 1
+                    st.append((v, iter(adj[v])))
+                    found = True
+                    break
+            if not found:
+                state[u] = 2
+                st.pop()
     return False
 \end{lstlisting}
-\end{cpblock}
+\warn{State 2 is what separates a back edge (a real cycle) from a cross
+edge. A plain visited array reports cycles that do not exist.}
 
-\newpage
+\sub{Topological Sort (Kahn)}{V + E}
+\begin{lstlisting}
+from collections import deque
 
-% =========================
-\section{Shortest Paths and DSU}
-% =========================
-\begin{cpblock}{Dijkstra}
-Graph format: \code{adj[u] = [(v, w), ...]}.
+def topo_sort(adj, n):
+    indeg = [0] * n
+    for u in range(n):
+        for v in adj[u]:
+            indeg[v] += 1
+
+    q = deque(i for i in range(n) if indeg[i] == 0)
+    order = []
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in adj[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                q.append(v)
+
+    return order if len(order) == n else []   # [] = cycle
+\end{lstlisting}
+\uses{a short result means a cycle exists, so this doubles as cycle
+detection. Use \code{heapq} instead of \code{deque} for the
+lexicographically smallest order.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Shortest Paths, MST and DSU}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Dijkstra}{E \log V}
 \begin{lstlisting}
 from heapq import heappush, heappop
 
-INF = 10**30
-
-def dijkstra(adj, s):
-    n = len(adj)
+def dijkstra(wadj, s, n):
+    INF = float('inf')
     dist = [INF] * n
     dist[s] = 0
     pq = [(0, s)]
-
     while pq:
         d, u = heappop(pq)
-        if d != dist[u]:
-            continue
-        for v, w in adj[u]:
+        if d > dist[u]:
+            continue                 # stale entry
+        for v, w in wadj[u]:
             nd = d + w
             if nd < dist[v]:
                 dist[v] = nd
                 heappush(pq, (nd, v))
     return dist
 \end{lstlisting}
-\end{cpblock}
+\warn{Fails on negative weights. The \code{d > dist[u]} skip is not
+optional --- Python's \code{heapq} has no decrease-key, so stale entries
+must be discarded on pop.}
 
-\begin{cpblock}{Disjoint Set Union}
+\subsection{Path Reconstruction}
+\begin{lstlisting}
+par = [-1] * n
+# inside the relaxation:
+#     par[v] = u
+
+path, cur = [], t
+while cur != -1:
+    path.append(cur)
+    cur = par[cur]
+path.reverse()
+\end{lstlisting}
+
+\sub{Bellman-Ford}{VE}
+\begin{lstlisting}
+def bellman_ford(edges, s, n):
+    INF = float('inf')
+    dist = [INF] * n
+    dist[s] = 0
+    for _ in range(n - 1):
+        changed = False
+        for w, u, v in edges:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                changed = True
+        if not changed:
+            break                   # early exit
+    # one more pass: any improvement means a negative cycle
+    neg = any(dist[u] + w < dist[v] for w, u, v in edges)
+    return dist, neg
+\end{lstlisting}
+\uses{negative weights, and detecting negative cycles. The
+\code{changed} flag often cuts the real runtime dramatically.}
+
+\sub{Floyd-Warshall}{V^3}
+\begin{lstlisting}
+# d[i][j] = edge weight, INF if none, 0 on the diagonal
+for k in range(n):
+    dk = d[k]
+    for i in range(n):
+        dik = d[i][k]
+        if dik == INF:
+            continue                # big speedup
+        di = d[i]
+        for j in range(n):
+            nd = dik + dk[j]
+            if nd < di[j]:
+                di[j] = nd
+
+# d[i][i] < 0  =>  i lies on a negative cycle
+\end{lstlisting}
+\warn{\code{k} must be the outermost loop. Any other order silently
+gives wrong answers.}
+\tip{In Python, prefer the row-wise form:
+\code{d[i] = list(map(min, d[i], (dik + x for x in d[k])))}
+pushes the inner loop into C and is several times faster.}
+
+\sub{DSU / Union-Find}{\alpha(n)}
 \begin{lstlisting}
 class DSU:
     def __init__(self, n):
         self.parent = list(range(n))
         self.sz = [1] * n
+        self.components = n
 
-    def find(self, x):
+    def find(self, x):              # iterative + halving
         while self.parent[x] != x:
             self.parent[x] = self.parent[self.parent[x]]
             x = self.parent[x]
         return x
 
-    def unite(self, a, b):
+    def unite(self, a, b):          # union by size
         ra, rb = self.find(a), self.find(b)
         if ra == rb:
             return False
@@ -933,237 +1963,569 @@ class DSU:
             ra, rb = rb, ra
         self.parent[rb] = ra
         self.sz[ra] += self.sz[rb]
+        self.components -= 1
         return True
+
+    def same(self, a, b):
+        return self.find(a) == self.find(b)
+
+    def size(self, x):
+        return self.sz[self.find(x)]
 \end{lstlisting}
-\end{cpblock}
+\tip{The iterative \code{find} with path halving avoids Python's
+recursion overhead entirely and is the right default here.}
+\warn{DSU cannot remove edges. When a problem deletes them, process the
+queries in reverse.}
 
-\begin{cpblock}{Floyd-Warshall}
-All-pairs shortest paths. Use only for small $n$.
+\sub{Kruskal MST}{E \log E}
 \begin{lstlisting}
-for k in range(n):
-    for i in range(n):
-        dik = dist[i][k]
-        for j in range(n):
-            nd = dik + dist[k][j]
-            if nd < dist[i][j]:
-                dist[i][j] = nd
+def kruskal(edges, n):
+    edges.sort()                    # by weight
+    dsu = DSU(n)
+    total = used = 0
+    for w, u, v in edges:
+        if dsu.unite(u, v):
+            total += w
+            used += 1
+            if used == n - 1:
+                break
+    return total if used == n - 1 else -1   # -1: disconnected
 \end{lstlisting}
-\end{cpblock}
+\tip{Sort descending for a maximum spanning tree. For "minimise the
+largest edge on a path" problems, the MST is the answer.}
 
-\newpage
-
-% =========================
-\section{String Matching Algorithms}
-% =========================
-\begin{cpblock}{KMP Prefix Function}
+\sub{Prim MST}{E \log V}
 \begin{lstlisting}
-def prefix_function(s):
-    n = len(s)
-    pi = [0] * n
-    for i in range(1, n):
-        j = pi[i - 1]
-        while j > 0 and s[i] != s[j]:
-            j = pi[j - 1]
-        if s[i] == s[j]:
-            j += 1
-        pi[i] = j
-    return pi
+from heapq import heappush, heappop
+
+def prim(wadj, n):
+    inmst = [False] * n
+    pq = [(0, 0)]
+    total = used = 0
+    while pq and used < n:
+        w, u = heappop(pq)
+        if inmst[u]:
+            continue
+        inmst[u] = True
+        total += w
+        used += 1
+        for v, c in wadj[u]:
+            if not inmst[v]:
+                heappush(pq, (c, v))
+    return total if used == n else -1
 \end{lstlisting}
-\end{cpblock}
+\uses{better than Kruskal on dense graphs, where sorting all $E$ edges
+dominates.}
 
-\begin{cpblock}{KMP Pattern Matching}
-Find all occurrences of pattern \code{p} in text \code{t}.
+\end{multicols}
+
+% =====================================================================
+\section{Trees and Advanced Graphs}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Rooting: Parent, Depth, Subtree Size}{n}
 \begin{lstlisting}
-def kmp_search(t, p):
-    s = p + '#' + t
-    pi = prefix_function(s)
-    ans = []
-    m = len(p)
-    for i in range(m + 1, len(s)):
-        if pi[i] == m:
-            ans.append(i - 2 * m)
-    return ans
+def root_tree(adj, n, root=0):
+    par = [-1] * n
+    dep = [0] * n
+    order = [root]
+    seen = [False] * n
+    seen[root] = True
+    for u in order:                 # BFS-style, no recursion
+        for v in adj[u]:
+            if not seen[v]:
+                seen[v] = True
+                par[v] = u
+                dep[v] = dep[u] + 1
+                order.append(v)
+
+    sub = [1] * n
+    for u in reversed(order):       # children first
+        if par[u] != -1:
+            sub[par[u]] += sub[u]
+    return par, dep, sub, order
 \end{lstlisting}
-\end{cpblock}
+\tip{Iterating a list while appending to it gives a clean, recursion-free
+BFS. \code{reversed(order)} is a valid post-order for any tree DP.}
 
-\begin{cpblock}{Z-Function}
+\sub{Tree Diameter}{n}
 \begin{lstlisting}
-def z_function(s):
-    n = len(s)
-    z = [0] * n
-    l = r = 0
-    for i in range(1, n):
-        if i <= r:
-            z[i] = min(r - i + 1, z[i - l])
-        while i + z[i] < n and s[z[i]] == s[i + z[i]]:
-            z[i] += 1
-        if i + z[i] - 1 > r:
-            l, r = i, i + z[i] - 1
-    return z
+# 1. BFS from any node   -> farthest node a
+# 2. BFS from a          -> farthest node b
+# dist(a, b) is the diameter
+def diameter(adj, n):
+    d = bfs(0, adj, n)
+    a = max(range(n), key=lambda i: d[i])
+    d = bfs(a, adj, n)
+    b = max(range(n), key=lambda i: d[i])
+    return d[b], a, b
 \end{lstlisting}
-\end{cpblock}
+\warn{The two-BFS trick is valid on \emph{trees} only. It is wrong on
+general graphs.}
 
-\begin{cpblock}{Z-Function Pattern Matching}
+\sub{LCA with Binary Lifting}{n \log n \text{ build},\; \log n \text{ query}}
 \begin{lstlisting}
-def z_search(t, p):
-    s = p + '#' + t
-    z = z_function(s)
-    m = len(p)
-    return [i - m - 1 for i in range(m + 1, len(s)) if z[i] >= m]
+class LCA:
+    def __init__(self, adj, n, root=0):
+        self.LOG = max(1, n.bit_length())
+        self.par, self.dep, _, _ = root_tree(adj, n, root)
+        self.par[root] = root       # self-loop at the root
+
+        self.up = [self.par[:]]
+        for j in range(1, self.LOG):
+            prev = self.up[j - 1]
+            self.up.append([prev[prev[i]] for i in range(n)])
+
+    def query(self, u, v):
+        if self.dep[u] < self.dep[v]:
+            u, v = v, u
+        diff = self.dep[u] - self.dep[v]
+        for j in range(self.LOG):
+            if diff >> j & 1:
+                u = self.up[j][u]
+        if u == v:
+            return u
+        for j in range(self.LOG - 1, -1, -1):
+            if self.up[j][u] != self.up[j][v]:
+                u, v = self.up[j][u], self.up[j][v]
+        return self.up[0][u]
+
+    def dist(self, u, v):
+        return (self.dep[u] + self.dep[v]
+                - 2 * self.dep[self.query(u, v)])
+
+    def kth_ancestor(self, u, k):
+        for j in range(self.LOG):
+            if k >> j & 1:
+                u = self.up[j][u]
+        return u
 \end{lstlisting}
-\end{cpblock}
+\warn{The root must point to itself, so lifting past it is a harmless
+no-op.}
 
-\begin{cpblock}{Manacher - Odd Palindromes}
-\code{d1[i]} = radius of odd palindrome centered at \code{i}.
+\sub{Euler Tour: Subtree as a Range}{n}
 \begin{lstlisting}
-def manacher_odd(s):
-    n = len(s)
-    d1 = [0] * n
-    l, r = 0, -1
-    for i in range(n):
-        k = 1 if i > r else min(d1[l + r - i], r - i + 1)
-        while 0 <= i - k and i + k < n and s[i - k] == s[i + k]:
-            k += 1
-        d1[i] = k
-        if i + k - 1 > r:
-            l, r = i - k + 1, i + k - 1
-    return d1
+def euler_tour(adj, n, root=0):
+    tin = [0] * n
+    tout = [0] * n
+    timer = 0
+    st = [(root, -1, False)]
+    while st:
+        u, p, back = st.pop()
+        if back:
+            tout[u] = timer         # half-open [tin, tout)
+            continue
+        tin[u] = timer
+        timer += 1
+        st.append((u, p, True))
+        for v in adj[u]:
+            if v != p:
+                st.append((v, u, False))
+    return tin, tout
+
+def is_ancestor(u, v, tin, tout):
+    return tin[u] <= tin[v] and tout[v] <= tout[u]
 \end{lstlisting}
-\end{cpblock}
+\uses{a subtree becomes the contiguous range $[tin_u, tout_u)$, so
+subtree sum and subtree update reduce to an ordinary BIT or segment tree
+range operation.}
 
-\begin{cpblock}{Manacher - Even Palindromes}
-\code{d2[i]} = radius of even palindrome centered between \code{i-1} and \code{i}.
+\sub{DP on Trees}{n}
 \begin{lstlisting}
-def manacher_even(s):
-    n = len(s)
-    d2 = [0] * n
-    l, r = 0, -1
-    for i in range(n):
-        k = 0 if i > r else min(d2[l + r - i + 1], r - i + 1)
-        while 0 <= i - k - 1 and i + k < n and s[i - k - 1] == s[i + k]:
-            k += 1
-        d2[i] = k
-        if i + k - 1 > r:
-            l, r = i - k, i + k - 1
-    return d2
+# Largest independent set, iteratively
+def max_independent_set(adj, n, root=0):
+    par, dep, sub, order = root_tree(adj, n, root)
+    take = [1] * n          # u taken
+    skip = [0] * n          # u not taken
+    for u in reversed(order):
+        p = par[u]
+        if p != -1:
+            skip[p] += max(take[u], skip[u])
+            take[p] += skip[u]
+    return max(take[root], skip[root])
 \end{lstlisting}
-\end{cpblock}
+\tip{Pushing values into the parent while walking
+\code{reversed(order)} replaces the whole recursive formulation.}
 
-\newpage
-
-% =========================
-\section{Dynamic Programming and Sequences}
-% =========================
-\begin{cpblock}{LIS - Longest Increasing Subsequence}
-$O(n\log n)$ length only.
+\sub{Bridges}{V + E}
+An edge whose removal disconnects the graph.
 \begin{lstlisting}
-from bisect import bisect_left, bisect_right
-
-def lis_length(a):
-    lis = []
-    for x in a:
-        i = bisect_left(lis, x)
-        if i == len(lis):
-            lis.append(x)
-        else:
-            lis[i] = x
-    return len(lis)
-
-# For longest non-decreasing subsequence, use bisect_right.
+def bridges(adj_id, n):
+    # adj_id[u] = list of (neighbour, edge_id)
+    tin = [-1] * n
+    low = [0] * n
+    timer = 0
+    res = []
+    for s in range(n):
+        if tin[s] != -1:
+            continue
+        st = [(s, -1, iter(adj_id[s]))]
+        tin[s] = low[s] = timer
+        timer += 1
+        while st:
+            u, pe, it = st[-1]
+            advanced = False
+            for v, eid in it:
+                if eid == pe:
+                    continue
+                if tin[v] != -1:
+                    low[u] = min(low[u], tin[v])
+                else:
+                    tin[v] = low[v] = timer
+                    timer += 1
+                    st.append((v, eid, iter(adj_id[v])))
+                    advanced = True
+                    break
+            if not advanced:
+                st.pop()
+                if st:
+                    p = st[-1][0]
+                    low[p] = min(low[p], low[u])
+                    if low[u] > tin[p]:
+                        res.append((p, u))
+    return res
 \end{lstlisting}
-\end{cpblock}
+\warn{Skip by \emph{edge id}, never by parent node --- otherwise
+parallel edges are wrongly reported as bridges.}
 
-\begin{cpblock}{Maximum Subarray Sum - Kadane}
-Works even if all numbers are negative.
+\sub{SCC (Kosaraju)}{V + E}
 \begin{lstlisting}
-def kadane(a):
-    best = -10**30
-    cur = 0
-    for x in a:
-        cur = max(x, cur + x)
-        best = max(best, cur)
+def kosaraju(adj, n):
+    radj = [[] for _ in range(n)]
+    for u in range(n):
+        for v in adj[u]:
+            radj[v].append(u)
+
+    vis = [False] * n
+    order = []
+    for s in range(n):              # iterative post-order
+        if vis[s]:
+            continue
+        st = [(s, iter(adj[s]))]
+        vis[s] = True
+        while st:
+            u, it = st[-1]
+            for v in it:
+                if not vis[v]:
+                    vis[v] = True
+                    st.append((v, iter(adj[v])))
+                    break
+            else:
+                order.append(u)
+                st.pop()
+
+    comp = [-1] * n
+    c = 0
+    for u in reversed(order):
+        if comp[u] != -1:
+            continue
+        stack = [u]
+        comp[u] = c
+        while stack:
+            x = stack.pop()
+            for y in radj[x]:
+                if comp[y] == -1:
+                    comp[y] = c
+                    stack.append(y)
+        c += 1
+    return comp, c
+\end{lstlisting}
+\uses{contracting each SCC gives a DAG (the condensation) that you can
+topologically sort or run a DP over.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Dynamic Programming}
+% =====================================================================
+\begin{multicols}{2}
+
+\subsection{How to Build a DP}
+\begin{enumerate}
+    \item \textbf{State} --- what exactly does \code{dp[i][j]} mean?
+          Write it as a sentence first.
+    \item \textbf{Transition} --- how do smaller states combine?
+    \item \textbf{Base case} --- the smallest state, filled directly.
+    \item \textbf{Order} --- iterate so every dependency is ready.
+    \item \textbf{Answer} --- which state (or aggregate) is the result?
+\end{enumerate}
+\tip{Cost $=$ number of states $\times$ cost per transition. Check that
+against the constraints before writing code.}
+
+\subsection{Top-Down vs Bottom-Up}
+\begin{lstlisting}
+from functools import cache
+
+# Top-down: fastest to write, only visits reachable states
+@cache
+def f(i, cap):
+    if i == n or cap == 0:
+        return 0
+    best = f(i + 1, cap)
+    if wt[i] <= cap:
+        best = max(best, f(i + 1, cap - wt[i]) + val[i])
     return best
 \end{lstlisting}
-\end{cpblock}
+\warn{On deep DPs the recursion limit bites. Convert to bottom-up, or
+run inside a thread with a big stack.}
 
-\begin{cpblock}{Basic 1D DP Pattern}
+\sub{0/1 Knapsack}{nW}
 \begin{lstlisting}
-dp = [0] * (n + 1)
-dp[0] = 1
-
-for i in range(1, n + 1):
-    # transition here
-    dp[i] = dp[i - 1]
+dp = [0] * (W + 1)
+for i in range(n):
+    w, v = wt[i], val[i]
+    for c in range(W, w - 1, -1):       # DESCENDING
+        cand = dp[c - w] + v
+        if cand > dp[c]:
+            dp[c] = cand
+# dp[W] = best value within capacity W
 \end{lstlisting}
-\end{cpblock}
+\warn{Descending is what enforces "each item at most once". Ascending
+turns it into the unbounded version.}
 
-\begin{cpblock}{Bitmask DP Skeleton}
+\sub{Unbounded Knapsack / Coin Change}{nW}
 \begin{lstlisting}
-INF = 10**30
-dp = [INF] * (1 << n)
+# Minimum number of coins summing to W
+BIG = float('inf')
+dp = [BIG] * (W + 1)
 dp[0] = 0
+for c in coins:
+    for w in range(c, W + 1):           # ASCENDING
+        if dp[w - c] + 1 < dp[w]:
+            dp[w] = dp[w - c] + 1
 
-for mask in range(1 << n):
-    for i in range(n):
-        if not (mask & (1 << i)):
-            new_mask = mask | (1 << i)
-            dp[new_mask] = min(dp[new_mask], dp[mask] + cost[i])
+# Number of distinct combinations (order ignored)
+ways = [0] * (W + 1)
+ways[0] = 1
+for c in coins:
+    for w in range(c, W + 1):
+        ways[w] += ways[w - c]
 \end{lstlisting}
-\end{cpblock}
+\warn{Loop order decides the meaning. Coins outside, sums inside counts
+\emph{combinations}; sums outside, coins inside counts
+\emph{permutations}.}
 
-\newpage
+\sub{LCS}{nm}
+\begin{lstlisting}
+prev = [0] * (m + 1)
+for i in range(1, n + 1):
+    cur = [0] * (m + 1)
+    ai = a[i - 1]
+    for j in range(1, m + 1):
+        if ai == b[j - 1]:
+            cur[j] = prev[j - 1] + 1
+        else:
+            cur[j] = max(prev[j], cur[j - 1])
+    prev = cur
+# prev[m] = LCS length
+\end{lstlisting}
 
-% =========================
+\sub{Edit Distance}{nm}
+\begin{lstlisting}
+prev = list(range(m + 1))            # insertions
+for i in range(1, n + 1):
+    cur = [i] + [0] * m              # deletions
+    ai = a[i - 1]
+    for j in range(1, m + 1):
+        if ai == b[j - 1]:
+            cur[j] = prev[j - 1]
+        else:
+            cur[j] = 1 + min(prev[j],       # delete
+                             cur[j - 1],    # insert
+                             prev[j - 1])   # replace
+    prev = cur
+# prev[m] = edit distance
+\end{lstlisting}
+
+\sub{Bitmask DP (TSP)}{2^n n^2}
+\begin{lstlisting}
+INF = float('inf')
+full = 1 << n
+dp = [[INF] * n for _ in range(full)]
+dp[1][0] = 0                          # start at node 0
+
+for mask in range(full):
+    row = dp[mask]
+    for i in range(n):
+        if row[i] == INF or not mask >> i & 1:
+            continue
+        base, ci = row[i], cost[i]
+        for j in range(n):
+            if mask >> j & 1:
+                continue
+            nm = mask | (1 << j)
+            if base + ci[j] < dp[nm][j]:
+                dp[nm][j] = base + ci[j]
+
+ans = min(dp[full - 1][i] + cost[i][0] for i in range(1, n))
+\end{lstlisting}
+\uses{$n \le 20$ in the constraints is the tell for bitmask DP.}
+
+\sub{Digit DP}{|d| \cdot 10 \cdot \text{states}}
+\begin{lstlisting}
+from functools import lru_cache
+
+def count_up_to(num_str):
+    digits = list(map(int, num_str))
+
+    @lru_cache(maxsize=None)
+    def go(pos, tight, acc):
+        if pos == len(digits):
+            return 1 if good(acc) else 0
+        lim = digits[pos] if tight else 9
+        total = 0
+        for d in range(lim + 1):
+            total += go(pos + 1,
+                        tight and d == lim,
+                        acc + d)
+        return total
+
+    res = go(0, True, 0)
+    go.cache_clear()
+    return res
+# Range [L, R]: count_up_to(R) - count_up_to(L - 1)
+\end{lstlisting}
+\tip{\code{lru\_cache} handles the \code{tight} flag correctly on its
+own --- it is part of the key. Just remember to clear between tests.}
+
+\sub{Longest Path on a DAG}{V + E}
+\begin{lstlisting}
+dp = [0] * n
+for u in topo_order:
+    for v in adj[u]:
+        if dp[u] + 1 > dp[v]:
+            dp[v] = dp[u] + 1
+\end{lstlisting}
+\uses{NP-hard on general graphs, linear on a DAG --- the topological
+order removes all cyclic dependencies.}
+
+\subsection{Memory Optimisation}
+\begin{lstlisting}
+# When row i only reads row i-1, keep two rows
+prev = [0] * (m + 1)
+for i in range(1, n + 1):
+    cur = [0] * (m + 1)
+    # fill cur from prev
+    prev = cur
+\end{lstlisting}
+\tip{A $10^5 \times 10^5$ table is impossible; two rows is nothing.
+Rolling arrays are often the difference between MLE and AC.}
+
+\end{multicols}
+
+% =====================================================================
 \section{Advanced Data Structures}
-% =========================
-\begin{cpblock}{Fenwick Tree - BIT}
-1-indexed structure for prefix sums.
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Fenwick Tree (BIT)}{\log n}
 \begin{lstlisting}
 class Fenwick:
     def __init__(self, n):
         self.n = n
         self.bit = [0] * (n + 1)
 
-    def add(self, idx, val):
-        while idx <= self.n:
-            self.bit[idx] += val
-            idx += idx & -idx
+    def add(self, i, v):            # 1-indexed
+        while i <= self.n:
+            self.bit[i] += v
+            i += i & -i
 
-    def sum(self, idx):
-        res = 0
-        while idx > 0:
-            res += self.bit[idx]
-            idx -= idx & -idx
-        return res
+    def sum(self, i):               # prefix [1, i]
+        r = 0
+        while i > 0:
+            r += self.bit[i]
+            i -= i & -i
+        return r
 
-    def range_sum(self, l, r):
+    def range(self, l, r):
         return self.sum(r) - self.sum(l - 1)
-\end{lstlisting}
-\end{cpblock}
 
-\begin{cpblock}{Segment Tree - Range Sum}
-Iterative version: compact and fast in Python.
+    def kth(self, k):
+        # smallest i with prefix sum >= k, O(log n)
+        pos = 0
+        step = 1 << (self.n.bit_length() - 1)
+        while step:
+            nxt = pos + step
+            if nxt <= self.n and self.bit[nxt] < k:
+                pos = nxt
+                k -= self.bit[pos]
+            step >>= 1
+        return pos + 1
+\end{lstlisting}
+\warn{A BIT is 1-indexed. Passing index 0 makes \code{add} loop forever
+because \code{0 \& -0 == 0}.}
+\tip{Smaller and faster than a segment tree. Reach for it whenever
+prefix sums suffice.}
+
+\sub{Fenwick: Range Update, Point Query}{\log n}
+\begin{lstlisting}
+# Store the difference array inside the BIT
+def add_range(f, l, r, v):
+    f.add(l, v)
+    f.add(r + 1, -v)
+
+def point_query(f, i):
+    return f.sum(i)
+\end{lstlisting}
+
+\sub{2D Fenwick}{\log^2 n}
+\begin{lstlisting}
+class Fenwick2D:
+    def __init__(self, n, m):
+        self.n, self.m = n, m
+        self.bit = [[0] * (m + 1) for _ in range(n + 1)]
+
+    def add(self, x, y, v):
+        i = x
+        while i <= self.n:
+            j = y
+            row = self.bit[i]
+            while j <= self.m:
+                row[j] += v
+                j += j & -j
+            i += i & -i
+
+    def sum(self, x, y):
+        r = 0
+        i = x
+        while i > 0:
+            j = y
+            row = self.bit[i]
+            while j > 0:
+                r += row[j]
+                j -= j & -j
+            i -= i & -i
+        return r
+
+    def rect(self, x1, y1, x2, y2):
+        return (self.sum(x2, y2) - self.sum(x1 - 1, y2)
+                - self.sum(x2, y1 - 1)
+                + self.sum(x1 - 1, y1 - 1))
+\end{lstlisting}
+
+\sub{Segment Tree (Iterative)}{\log n}
 \begin{lstlisting}
 class SegTree:
     def __init__(self, a):
         self.n = len(a)
         self.t = [0] * (2 * self.n)
-        self.t[self.n:] = a[:]
+        self.t[self.n:] = a
         for i in range(self.n - 1, 0, -1):
-            self.t[i] = self.t[i << 1] + self.t[i << 1 | 1]
+            self.t[i] = self.t[2*i] + self.t[2*i + 1]
 
-    def update(self, pos, val):
+    def update(self, pos, val):     # point assignment
         pos += self.n
         self.t[pos] = val
         pos >>= 1
         while pos:
-            self.t[pos] = self.t[pos << 1] + self.t[pos << 1 | 1]
+            self.t[pos] = self.t[2*pos] + self.t[2*pos + 1]
             pos >>= 1
 
-    def query(self, l, r):  # inclusive [l, r]
+    def query(self, l, r):          # inclusive [l, r]
+        res = 0                     # neutral element
         l += self.n
         r += self.n + 1
-        res = 0
         while l < r:
             if l & 1:
                 res += self.t[l]
@@ -1175,111 +2537,241 @@ class SegTree:
             r >>= 1
         return res
 \end{lstlisting}
-\end{cpblock}
+\tip{Compact and the fastest segment tree in Python. For min/max, swap
+\code{+} for \code{min}/\code{max} and change the neutral element.}
 
-\begin{cpblock}{Coordinate Compression}
+\sub{Segment Tree with Lazy Propagation}{\log n}
+\begin{lstlisting}
+class LazySeg:
+    def __init__(self, a):
+        self.n = len(a)
+        self.t = [0] * (4 * self.n)
+        self.lz = [0] * (4 * self.n)
+        self._build(a, 1, 0, self.n - 1)
+
+    def _build(self, a, v, tl, tr):
+        if tl == tr:
+            self.t[v] = a[tl]
+            return
+        tm = (tl + tr) // 2
+        self._build(a, 2*v, tl, tm)
+        self._build(a, 2*v + 1, tm + 1, tr)
+        self.t[v] = self.t[2*v] + self.t[2*v + 1]
+
+    def _push(self, v, tl, tr):
+        if not self.lz[v]:
+            return
+        self.t[v] += self.lz[v] * (tr - tl + 1)
+        if tl != tr:
+            self.lz[2*v]     += self.lz[v]
+            self.lz[2*v + 1] += self.lz[v]
+        self.lz[v] = 0
+
+    def update(self, v, tl, tr, l, r, val):
+        self._push(v, tl, tr)
+        if l > tr or tl > r:
+            return
+        if l <= tl and tr <= r:
+            self.lz[v] += val
+            self._push(v, tl, tr)
+            return
+        tm = (tl + tr) // 2
+        self.update(2*v, tl, tm, l, r, val)
+        self.update(2*v + 1, tm + 1, tr, l, r, val)
+        self.t[v] = self.t[2*v] + self.t[2*v + 1]
+
+    def query(self, v, tl, tr, l, r):
+        self._push(v, tl, tr)
+        if l > tr or tl > r:
+            return 0
+        if l <= tl and tr <= r:
+            return self.t[v]
+        tm = (tl + tr) // 2
+        return (self.query(2*v, tl, tm, l, r)
+                + self.query(2*v + 1, tm + 1, tr, l, r))
+\end{lstlisting}
+\warn{\code{\_push} must run at the top of \emph{every} recursive call,
+queries included. A missing push is the classic lazy bug.}
+
+\sub{Sparse Table (RMQ)}{n \log n \text{ build},\; 1 \text{ query}}
+\begin{lstlisting}
+class SparseTable:
+    def __init__(self, a):
+        n = len(a)
+        self.lg = [0] * (n + 1)
+        for i in range(2, n + 1):
+            self.lg[i] = self.lg[i >> 1] + 1
+
+        self.sp = [a[:]]
+        j = 1
+        while (1 << j) <= n:
+            prev = self.sp[-1]
+            half = 1 << (j - 1)
+            self.sp.append([
+                min(prev[i], prev[i + half])
+                for i in range(n - (1 << j) + 1)
+            ])
+            j += 1
+
+    def query(self, l, r):          # inclusive
+        j = self.lg[r - l + 1]
+        return min(self.sp[j][l], self.sp[j][r - (1 << j) + 1])
+\end{lstlisting}
+\warn{Only valid for \emph{idempotent} operations --- min, max, gcd ---
+where overlap is harmless. Not for sums, and it does not support
+updates.}
+
+\subsection{Ordered Set Substitute}
+Python has no built-in balanced BST. The usual replacements:
+\begin{lstlisting}
+# 1. A BIT over compressed values (order statistics)
+#    -> kth() and rank queries in O(log n)
+
+# 2. sortedcontainers, when the judge provides it
+from sortedcontainers import SortedList
+sl = SortedList()
+sl.add(x)
+sl.remove(x)
+sl[k]                  # k-th smallest, O(log n)
+sl.bisect_left(x)      # rank of x
+\end{lstlisting}
+\warn{\code{sortedcontainers} is not in the standard library. Codeforces
+ships it; many judges do not. The BIT approach always works.}
+
+\subsection{Coordinate Compression}
 \begin{lstlisting}
 vals = sorted(set(a))
-comp = {x: i for i, x in enumerate(vals)}
-compressed = [comp[x] for x in a]
+comp = {x: i + 1 for i, x in enumerate(vals)}  # 1-indexed
 \end{lstlisting}
-\end{cpblock}
+\uses{the standard prerequisite for putting large values into a BIT.}
 
-\begin{cpblock}{Order Statistics with Fenwick}
-Useful when values are compressed to $1..m$.
+\end{multicols}
+
+% =====================================================================
+\section{Contest Techniques and Pitfalls}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Meet in the Middle}{2^{n/2} \cdot n}
 \begin{lstlisting}
-def kth(bit, k):
-    # returns smallest idx with prefix sum >= k
-    idx = 0
-    step = 1 << (bit.n.bit_length() - 1)
-    while step:
-        nxt = idx + step
-        if nxt <= bit.n and bit.bit[nxt] < k:
-            idx = nxt
-            k -= bit.bit[nxt]
-        step >>= 1
-    return idx + 1
+from itertools import combinations
+from bisect import bisect_right
+
+def subset_sums(v):
+    sums = [0]
+    for x in v:
+        sums += [s + x for s in sums]
+    return sums
+
+# n <= 40: split, sort one half, binary search it
+left  = sorted(subset_sums(a[:len(a)//2]))
+right = sorted(subset_sums(a[len(a)//2:]))
 \end{lstlisting}
-\end{cpblock}
+\uses{$n \le 40$ where $2^{40}$ is hopeless but $2^{20}$ is instant.}
 
-\begin{cpblock}{Heap Queue}
-\begin{lstlisting}
-from heapq import heappush, heappop
-
-pq = []
-heappush(pq, (dist, node))
-d, u = heappop(pq)
-
-# max-heap trick
-heappush(pq, -x)
-x = -heappop(pq)
-\end{lstlisting}
-\end{cpblock}
-
-\newpage
-
-% =========================
-\section{General Techniques and Tricks}
-% =========================
-\begin{cpblock}{Two Pointers}
-\begin{lstlisting}
-l = 0
-for r in range(n):
-    # add a[r]
-    while bad(l, r):
-        # remove a[l]
-        l += 1
-    # current window is [l, r]
-\end{lstlisting}
-\end{cpblock}
-
-\begin{cpblock}{Sliding Window Sum}
-\begin{lstlisting}
-cur = sum(a[:k])
-best = cur
-for r in range(k, n):
-    cur += a[r] - a[r - k]
-    best = max(best, cur)
-\end{lstlisting}
-\end{cpblock}
-
-\begin{cpblock}{Frequency Map}
-\begin{lstlisting}
-from collections import defaultdict, Counter
-
-freq = defaultdict(int)
-for x in a:
-    freq[x] += 1
-
-cnt = Counter(a)
-\end{lstlisting}
-\end{cpblock}
-
-\begin{cpblock}{Sorting with Keys}
-\begin{lstlisting}
-points.sort()                  # lexicographic
-points.sort(key=lambda p: p[1]) # by y
-points.sort(key=lambda p: (p[0], -p[1]))
-\end{lstlisting}
-\end{cpblock}
-
-\begin{cpblock}{Output Fast}
+\subsection{Interactive Problems}
 \begin{lstlisting}
 import sys
 
-ans = ["YES", "NO", "YES"]
-sys.stdout.write("\n".join(ans))
+print("?", x, flush=True)      # flush or you deadlock
+resp = int(input())
+
+print("!", answer, flush=True)
 \end{lstlisting}
-\end{cpblock}
+\warn{Do not use buffered output here, and do not rebind \code{input} to
+\code{sys.stdin.readline} without care --- read exactly one line per
+query.}
 
-\begin{cpblock}{Memory Tricks}
+\subsection{Stress Testing}
+\begin{lstlisting}
+import random, subprocess
+
+for test in range(1000):
+    n = random.randint(1, 8)        # keep it SMALL
+    a = [random.randint(-5, 5) for _ in range(n)]
+    data = f"{n}\n{' '.join(map(str, a))}\n"
+
+    r1 = subprocess.run(["python", "fast.py"],
+                        input=data, capture_output=True,
+                        text=True).stdout
+    r2 = subprocess.run(["python", "brute.py"],
+                        input=data, capture_output=True,
+                        text=True).stdout
+    if r1.strip() != r2.strip():
+        print("Mismatch:", data, r1, r2)
+        break
+\end{lstlisting}
+\tip{Generate tiny tests. A counterexample you can read by hand beats a
+200-line one you cannot.}
+
+\subsection{Speeding Up CPython}
 \begin{itemize}
-    \item Avoid huge lists of lists if a sparse structure works.
-    \item For grids, store characters as strings when read-only.
-    \item Use arrays of integers instead of dictionaries when indices are dense.
-    \item Use \code{bytearray(n)} for boolean-like arrays when memory is tight.
+    \item Put the work inside a function --- locals beat globals.
+    \item Bind hot attributes to locals:
+          \code{ap = res.append} before the loop.
+    \item Prefer comprehensions and \code{map} over explicit
+          \code{append} loops.
+    \item Use \code{sys.stdin.buffer.read()} for input and one
+          \code{sys.stdout.write} for output.
+    \item Replace inner loops with \code{sum}, \code{min},
+          \code{accumulate}, or slice assignment.
+    \item Store grids as strings, and flags as \code{bytearray}.
+    \item Submit on PyPy when the judge offers it.
 \end{itemize}
-\end{cpblock}
 
+\subsection{Greedy: Proving It Works}
+\begin{itemize}
+    \item \textbf{Exchange argument} --- show any optimal solution can be
+          rewritten into the greedy one without getting worse.
+    \item \textbf{Stays ahead} --- show the greedy prefix is at least as
+          good as any other at every step.
+    \item If neither works, it is probably a DP.
+\end{itemize}
+\tip{Cheapest check of all: brute-force small cases and diff against
+your greedy.}
+
+\subsection{Reading the Problem}
+\begin{itemize}
+    \item Is the answer guaranteed to exist, or must you print $-1$?
+    \item How many test cases? Is the sum of $n$ bounded?
+    \item 0-based or 1-based indices in the statement?
+    \item Can $n = 0$ or $n = 1$? Can the graph be disconnected?
+    \item Are values negative?
+    \item Is the graph a tree, a DAG, or fully general?
+\end{itemize}
+
+\subsection{Bug Checklist}
+\begin{itemize}
+    \item \code{[[0]*m]*n} --- shared rows, not a real 2D grid.
+    \item Mutable default argument: \code{def f(a=[])}.
+    \item State not reset between test cases (including
+          \code{cache\_clear()}).
+    \item Off-by-one: inclusive vs half-open ranges.
+    \item \code{/} where \code{//} was meant --- floats break exactness.
+    \item Forgetting \code{.rstrip()} on \code{sys.stdin.readline}.
+    \item \code{a.pop(0)} or \code{s += ch} in a loop --- silent $O(n^2)$.
+    \item Recursion depth on $10^5$ nodes.
+    \item Reading \code{defaultdict[k]} and creating the key by accident.
+    \item \code{float('inf')} contaminating integer arithmetic.
+\end{itemize}
+
+\subsection{Time Management}
+\begin{itemize}
+    \item Read \emph{every} problem first. The easiest is rarely
+          problem A.
+    \item Sort by solve count when the scoreboard shows it.
+    \item Stuck 20 minutes with no idea? Switch and come back.
+    \item Write the brute force when the statement is confusing --- it
+          clarifies the problem and doubles as a stress-test oracle.
+\end{itemize}
+
+\end{multicols}
+
+\vfill
+\begin{center}
+{\footnotesize\color{cmt}
+CP Reference Book --- Python Edition \quad\textbullet\quad
+A C++ edition with the same coverage ships alongside this one.\par}
+\end{center}
 
 \end{document}

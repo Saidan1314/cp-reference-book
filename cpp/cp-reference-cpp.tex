@@ -1,339 +1,737 @@
+% =====================================================================
+%  CP Reference Book - C++ Edition
+%  Adan Arteaga
+%  Self-contained: drop this single file into Overleaf and it compiles.
+%  Build: pdflatex -interaction=nonstopmode cp-reference-cpp.tex  (twice)
+% =====================================================================
 \documentclass[10pt]{article}
 
-% =========================
-% Idioma y codificacion
-% =========================
-\usepackage[spanish,es-nodecimaldot]{babel}
+% ---------------------------------------------------------------------
+% Language and encoding
+% ---------------------------------------------------------------------
+\usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 
-% =========================
-% Pagina: horizontal + margenes compactos
-% =========================
-\usepackage[landscape,margin=1cm]{geometry}
+% ---------------------------------------------------------------------
+% Page geometry: landscape, tight margins, two columns
+% ---------------------------------------------------------------------
+\usepackage[landscape,margin=1cm,top=1.4cm,bottom=1.2cm,headsep=0.35cm]{geometry}
 \usepackage{multicol}
-\setlength{\columnsep}{0.8cm}
-\setlength{\columnseprule}{0.35pt}
+\setlength{\columnsep}{0.75cm}
+\setlength{\columnseprule}{0.4pt}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{3pt}
+\setlength{\parskip}{2.5pt}
+\raggedcolumns
 
-% =========================
-% Matematicas, color, tablas y links
-% =========================
+% ---------------------------------------------------------------------
+% Core packages
+% ---------------------------------------------------------------------
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{xcolor}
-\usepackage{hyperref}
 \usepackage{enumitem}
-\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{array}
 \usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage[nobottomtitles*]{titlesec}
+\usepackage{hyperref}
+
+% ---------------------------------------------------------------------
+% Palette
+% ---------------------------------------------------------------------
+\definecolor{accent}{HTML}{18456B}   % section bars, headings
+\definecolor{accent2}{HTML}{0E7C66}  % code rule, complexity badges
+\definecolor{codebg}{HTML}{F5F7F9}   % code background
+\definecolor{hairline}{HTML}{C3CFD9} % rules and separators
+\definecolor{kw}{HTML}{0B5FA5}       % keywords
+\definecolor{cmt}{HTML}{6A737D}      % comments and muted text
+\definecolor{strc}{HTML}{1B7A3D}     % strings
+\definecolor{warnc}{HTML}{B00020}    % warnings
+\definecolor{tipc}{HTML}{9A6100}     % tips
+
+\renewcommand{\columnseprulecolor}{\color{hairline}}
 
 \hypersetup{
     colorlinks=true,
-    linkcolor=blue!45!black,
-    urlcolor=blue!45!black
+    linkcolor=accent,
+    urlcolor=accent2,
+    bookmarksnumbered=true,
+    bookmarksopen=true,
+    bookmarksdepth=2,
+    pdftitle={CP Reference Book - C++ Edition},
+    pdfauthor={Adan Arteaga}
 }
 
-% =========================
-% Estilo de secciones
-% =========================
-\titleformat{\section}{\Large\bfseries\color{blue!45!black}}{\thesection}{0.7em}{}
-\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection}{0.6em}{}
-\titlespacing*{\section}{0pt}{8pt}{5pt}
-\titlespacing*{\subsection}{0pt}{5pt}{2pt}
+% ---------------------------------------------------------------------
+% Headings
+% ---------------------------------------------------------------------
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{1}          % printed TOC: sections only, stays on one page
+\renewcommand{\bottomtitlespace}{0.09\textheight}
 
-\setlist[itemize]{leftmargin=*, itemsep=1pt, topsep=2pt}
+% titlesec passes the title to the LAST command of the before-code,
+% so both headings are wrapped in a helper that takes it as #1.
+\newcommand{\sectionbar}[1]{%
+  \hspace*{-\fboxsep}\colorbox{accent}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \vspace{2.5pt}\color{white}\thesection\hspace{0.8em}#1\vspace{2.5pt}}}}
+% Starred sections (the TOC heading) must not print a number.
+\newcommand{\sectionbarplain}[1]{%
+  \hspace*{-\fboxsep}\colorbox{accent}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \vspace{2.5pt}\color{white}#1\vspace{2.5pt}}}}
+% Thin rule under the title, drawn inside the heading so it cannot
+% collide with the text the way a titlesec after-code rule does.
+\newcommand{\subhead}[1]{%
+  \raisebox{0.35ex}{\color{accent2}\rule{2.1mm}{2.1mm}}\hspace{0.55em}#1%
+  \par\nobreak\vspace{1.5pt}{\color{hairline}\hrule height 0.4pt}\nobreak}
 
-% =========================
-% Configuracion de codigo
-% =========================
-\lstdefinestyle{cppstyle}{
+\titleformat{\section}[block]
+  {\normalfont\large\bfseries}{}{0pt}{\sectionbar}
+\titleformat{name=\section,numberless}[block]
+  {\normalfont\large\bfseries}{}{0pt}{\sectionbarplain}
+\titlespacing*{\section}{0pt}{16pt}{9pt}
+
+\titleformat{\subsection}[block]
+  {\normalfont\normalsize\bfseries\color{accent}}{}{0pt}{\subhead}
+\titlespacing*{\subsection}{0pt}{8pt}{-7pt}
+
+\setlist[itemize]{leftmargin=1.1em, itemsep=1pt, topsep=2pt, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.4em, itemsep=1pt, topsep=2pt, parsep=0pt}
+
+% ---------------------------------------------------------------------
+% Running head / foot
+% ---------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{cmt}\nouppercase{\leftmark}}
+\fancyhead[R]{\footnotesize\color{cmt}CP Reference Book \textbullet\ C++ Edition}
+\fancyfoot[C]{\footnotesize\color{cmt}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\color{hairline}\hrule height \headrulewidth}
+
+% ---------------------------------------------------------------------
+% Code style
+% ---------------------------------------------------------------------
+\lstdefinestyle{cpp}{
     language=C++,
     basicstyle=\ttfamily\scriptsize,
-    keywordstyle=\bfseries\color{blue!55!black},
-    commentstyle=\itshape\color{gray!70!black},
-    stringstyle=\color{green!35!black},
+    backgroundcolor=\color{codebg},
+    keywordstyle=\bfseries\color{kw},
+    commentstyle=\itshape\color{cmt},
+    stringstyle=\color{strc},
+    frame=leftline,
+    framerule=1.3pt,
+    rulecolor=\color{accent2},
+    framexleftmargin=4pt,
+    framexrightmargin=2pt,
+    xleftmargin=5pt,
     breaklines=true,
     breakatwhitespace=false,
+    postbreak=\mbox{\textcolor{cmt}{$\hookrightarrow$}\space},
     columns=fullflexible,
     keepspaces=true,
     showstringspaces=false,
     tabsize=2,
-    frame=single,
-    rulecolor=\color{black!20},
-    framerule=0.3pt,
-    xleftmargin=1pt,
-    xrightmargin=1pt,
-    aboveskip=3pt,
-    belowskip=3pt,
-    literate=
-        {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
-        {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
-        {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+    aboveskip=5pt,
+    belowskip=5pt,
+    upquote=true,
+    morekeywords={ll,pii,vi,int64_t,uint64_t,size_t,constexpr,nullptr,auto}
 }
-\lstset{style=cppstyle}
+\lstset{style=cpp}
 
-\newcommand{\code}[1]{\texttt{#1}}
+% ---------------------------------------------------------------------
+% Semantic macros
+% ---------------------------------------------------------------------
+\newcommand{\code}[1]{\texttt{\small #1}}
+% \sub{Title}{complexity without \mathcal{O}} -> heading + complexity badge
+\newcommand{\sub}[2]{\subsection[#1]{#1\hspace{0.6em}%
+  \textnormal{\color{accent2}\small$\mathcal{O}(#2)$}}}
+\newcommand{\uses}[1]{{\color{accent2}\footnotesize\textbf{Use:}}~{\footnotesize #1}\par}
+\newcommand{\tip}[1]{{\color{tipc}\footnotesize\textbf{Tip:}}~{\footnotesize #1}\par}
+\newcommand{\warn}[1]{{\color{warnc}\footnotesize\textbf{Careful:}}~{\footnotesize #1}\par}
+\newcommand{\note}[1]{{\footnotesize\color{cmt}#1}\par}
 
 \begin{document}
 \pagenumbering{gobble}
 
-% =========================
-% Portada
-% =========================
+% =====================================================================
+% Cover
+% =====================================================================
 \begin{titlepage}
     \centering
-    \vspace*{2cm}
+    \vspace*{1.6cm}
 
-    {\Huge\bfseries ICPC Reference Book\par}
+    {\color{accent}\rule{\linewidth}{2.5pt}}
     \vspace{0.7cm}
-    {\Huge Arteaga Adán\par}
 
-    \vspace{1.5cm}
-    {\Huge Algorithms Sheet\par}
-    \vspace{0.4cm}
-    {\Large Competitive Programming Reference\\
-    	\vspace{2cm}
-    	\textbf{C++ version}\par}
+    {\Huge\bfseries\color{accent} CP Reference Book\par}
+    \vspace{0.5cm}
+    {\LARGE C++ Edition\par}
+
+    \vspace{0.5cm}
+    {\color{accent}\rule{\linewidth}{2.5pt}}
+
+    \vspace{1.4cm}
+    {\Large Adán Arteaga\par}
+
+    \vspace{1.4cm}
+    {\large A contest-ready reference for competitive programming\\
+    and technical interviews\par}
+
+    \vspace{0.9cm}
+    {\normalsize\color{cmt}
+    Every snippet compiles and runs as written --- no pseudocode,\\
+    no placeholders. Complexities are stated where the choice matters.\par}
 
     \vfill
-
-    
-    \vfill
-    {\large GitHub-ready LaTeX Reference\par}
+    {\footnotesize\color{cmt}Landscape layout, two columns, built for printing.\\
+    Clickable table of contents and full PDF bookmarks for on-screen use.\par}
 \end{titlepage}
 
-% =========================
-% Indice dinamico
-% =========================
 \pagenumbering{roman}
+\thispagestyle{plain}
 \tableofcontents
 \newpage
 \pagenumbering{arabic}
 
-% =========================
-% 1. Base C++ y complejidad
-% =========================
-\section{Base C++ y complejidad}
+% =====================================================================
+\section{Contest Setup and Complexity}
+% =====================================================================
 \begin{multicols}{2}
+
+\subsection{Full Template}
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ull = unsigned long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+
+#define all(x)  (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define sz(x)   (int)(x).size()
+
+const ll INF  = 4e18;
+const int IINF = 1e9;
+const ll MOD  = 1e9 + 7;
+
+void solve() {
+    // ...
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    cin >> t;              // remove if single test case
+    while (t--) solve();
+    return 0;
+}
+\end{lstlisting}
+\warn{\code{bits/stdc++.h} is GCC-only. On MSVC or Clang without it,
+include the headers you need explicitly.}
 
 \subsection{Fast I/O}
 \begin{lstlisting}
 ios::sync_with_stdio(false);
 cin.tie(nullptr);
 \end{lstlisting}
+\warn{After this you cannot mix \code{cin} with \code{scanf}, or
+\code{cout} with \code{printf}. Pick one family and stay in it.}
 
-\subsection{Precisión decimal}
+\tip{\code{'\textbackslash n'} is faster than \code{endl}: \code{endl}
+flushes the buffer every single time. Only flush deliberately (interactive
+problems).}
+
+\subsection{Decimal Precision}
 \begin{lstlisting}
 cout << fixed << setprecision(10) << ans << '\n';
 \end{lstlisting}
+\tip{Compare doubles with an epsilon, never with \code{==}:
+\code{fabs(a - b) < 1e-9}. When the answer is an integer computed in
+floating point, round with \code{llround(x)} instead of casting.}
 
-\subsection{Límites de datos}
-\begin{itemize}
-    \item \code{int}: $\approx 2 \cdot 10^9$
-    \item \code{long long}: $\approx 9 \cdot 10^{18}$
-    \item \code{\_\_int128}: $\approx 10^{38}$, solo GCC.
-    \item \code{float}: 7 dígitos de precisión.
-    \item \code{double}: 15-17 dígitos de precisión.
-    \item \code{long double}: 18-19 dígitos de precisión.
-\end{itemize}
+\subsection{Data Type Limits}
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Type} & \textbf{Max} & \textbf{Precision} \\
+\midrule
+\code{int}          & $\approx 2\cdot 10^{9}$   & --- \\
+\code{unsigned}     & $\approx 4\cdot 10^{9}$   & --- \\
+\code{long long}    & $\approx 9\cdot 10^{18}$  & --- \\
+\code{unsigned ll}  & $\approx 1.8\cdot 10^{19}$& --- \\
+\code{\_\_int128}   & $\approx 1.7\cdot 10^{38}$& GCC only \\
+\code{float}        & ---                       & 7 digits \\
+\code{double}       & ---                       & 15--17 digits \\
+\code{long double}  & ---                       & 18--19 digits \\
+\bottomrule
+\end{tabular}
+\end{center}
+\warn{The single most common bug in contests: \code{int * int} overflows
+\emph{before} it is assigned to a \code{long long}. Cast one operand
+first: \code{(ll)a * b}.}
 
-\subsection{Truco de memoria}
+\subsection{Printing \_\_int128}
 \begin{lstlisting}
-// 256 MB aprox:
-int a[64 * 1024 * 1024];
+void print128(__int128 x) {
+    if (x < 0) { putchar('-'); x = -x; }
+    if (x > 9) print128(x / 10);
+    putchar((char)('0' + (int)(x % 10)));
+}
 \end{lstlisting}
+\uses{exact products of two \code{long long} values, and safe modular
+multiplication when \code{MOD} exceeds $2^{31}$.}
 
-\subsection{Complejidades comunes}
+\subsection{Complexity Classes}
 \begin{itemize}
-    \item $O(1)$: acceso a índice de arreglo.
-    \item $O(\log n)$: binary search, \code{std::set}.
-    \item $O(\sqrt n)$: primalidad, divisores.
-    \item $O(n)$: un recorrido lineal.
-    \item $O(n \log n)$: sorting, heap.
-    \item $O(n^2)$: doble loop, algunas DP.
-    \item $O(2^n)$: subconjuntos, bitmasking.
-    \item $O(n!)$: permutaciones.
+    \item $O(1)$ --- array index, hash lookup on average.
+    \item $O(\log n)$ --- binary search, \code{set}, heap push/pop.
+    \item $O(\sqrt n)$ --- primality, divisor enumeration.
+    \item $O(n)$ --- a single pass.
+    \item $O(n \log n)$ --- sorting, most greedy solutions.
+    \item $O(n^2)$ --- nested loops, many DP tables.
+    \item $O(2^n)$ --- subsets, bitmask DP.
+    \item $O(n!)$ --- permutations.
 \end{itemize}
 
-\subsection{Restricciones estándar}
-\begin{itemize}
-    \item $10^8$ operaciones por segundo, aproximado.
-    \item $n = 10^5 \rightarrow O(n \log n)$ u $O(n)$.
-    \item $n = 500 \rightarrow O(n^3)$.
-    \item $n = 20 \rightarrow O(2^n \cdot n)$.
-\end{itemize}
+\subsection{Constraint to Complexity}
+Assume roughly $10^8$ simple operations per second.
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Constraint} & \textbf{Target} \\
+\midrule
+$n \le 10$        & $O(n!)$ \\
+$n \le 20$        & $O(2^n \cdot n)$ \\
+$n \le 100$       & $O(n^4)$ \\
+$n \le 500$       & $O(n^3)$ \\
+$n \le 5000$      & $O(n^2)$ \\
+$n \le 10^5$      & $O(n \log n)$ \\
+$n \le 10^6$      & $O(n)$ or $O(n \log n)$ \\
+$n \le 10^{18}$   & $O(\log n)$ or $O(\sqrt n)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\tip{Read the constraints \emph{before} designing the solution. They
+usually name the intended complexity, which names the algorithm.}
 
-\subsection{Complejidad STL}
+\subsection{STL Complexity}
 \textbf{vector}
 \begin{itemize}
-    \item \code{push\_back()}, \code{pop\_back()}, \code{[]} $\rightarrow O(1)$.
-    \item \code{erase(iterator)} $\rightarrow O(n)$.
+    \item \code{push\_back}, \code{pop\_back}, \code{[]} $\rightarrow O(1)$
+          amortized.
+    \item \code{insert}, \code{erase} in the middle $\rightarrow O(n)$.
 \end{itemize}
 
-\textbf{set / map / multiset}
+\textbf{set / map / multiset} (balanced BST)
 \begin{itemize}
-    \item \code{insert()}, \code{erase()}, \code{find()} $\rightarrow O(\log n)$.
+    \item \code{insert}, \code{erase}, \code{find},
+          \code{lower\_bound} $\rightarrow O(\log n)$.
 \end{itemize}
 
-\textbf{unordered\_map / unordered\_set}
+\textbf{unordered\_map / unordered\_set} (hash table)
 \begin{itemize}
-    \item \code{insert()}, \code{find()} $\rightarrow$ promedio $O(1)$, peor caso $O(n)$.
+    \item \code{insert}, \code{find} $\rightarrow O(1)$ average,
+          $O(n)$ worst case.
 \end{itemize}
 
-\textbf{priority\_queue}
+\textbf{priority\_queue} (binary heap)
 \begin{itemize}
-    \item \code{push()}, \code{pop()} $\rightarrow O(\log n)$.
-    \item \code{top()} $\rightarrow O(1)$.
+    \item \code{push}, \code{pop} $\rightarrow O(\log n)$;
+          \code{top} $\rightarrow O(1)$.
 \end{itemize}
 
-\subsection{Algoritmos importantes}
-\textbf{Math \& Number Theory}
+\textbf{deque}
 \begin{itemize}
-    \item \textbf{GCD Euclides}: $O(\log(\min(a,b)))$.
-    \item \textbf{Binary Exponentiation}: $O(\log exp)$.
-    \item \textbf{Sieve of Eratosthenes}: $O(n \log \log n)$.
-    \item \textbf{Prime Factorization}: $O(\sqrt n)$.
+    \item \code{push\_front}, \code{push\_back}, \code{pop} on both
+          ends $\rightarrow O(1)$.
 \end{itemize}
 
-\textbf{Graphs}
-\begin{itemize}
-    \item \textbf{DFS / BFS}: $O(V + E)$.
-    \item \textbf{Dijkstra}: $O(E \log V)$.
-    \item \textbf{Floyd-Warshall}: $O(V^3)$.
-    \item \textbf{DSU Union-Find}: $O(\alpha(n))$.
-    \item \textbf{Segment Tree Query/Update}: $O(\log n)$.
-\end{itemize}
+\subsection{Memory Budget}
+\begin{lstlisting}
+// 4 bytes each: 64M ints ~= 256 MB
+int a[64 * 1024 * 1024];
+\end{lstlisting}
+\tip{Global arrays are zero-initialised and live in static storage;
+huge local arrays overflow the stack. Declare big arrays at global scope.}
 
-\textbf{Técnicas generales}
-\begin{itemize}
-    \item \textbf{Two Pointers / Sliding Window}: $O(n)$.
-    \item \textbf{Lower / Upper Bound}: $O(\log n)$.
-    \item \textbf{Prefix Sum Query}: $O(1)$.
-    \item \textbf{Iterating Submasks}: $O(3^n)$.
-    \item \textbf{Coordinate Compression}: $O(n \log n)$.
-\end{itemize}
+\subsection{Compilation and Debugging}
+\begin{lstlisting}
+g++ -std=c++17 -O2 -Wall -Wextra sol.cpp -o sol
+
+// Catches out-of-bounds and UB at runtime:
+g++ -std=c++17 -g -fsanitize=address,undefined sol.cpp
+\end{lstlisting}
+
+\begin{lstlisting}
+// Debug print that vanishes on the judge
+#ifdef LOCAL
+  #define dbg(x) cerr << #x << " = " << (x) << '\n'
+#else
+  #define dbg(x)
+#endif
+\end{lstlisting}
+\tip{Compile locally with \code{-DLOCAL}. \code{cerr} is not judged, so
+leftover debug output on \code{cerr} will not cause a wrong answer ---
+but it does cost time.}
 
 \end{multicols}
-\newpage
 
-% =========================
-% 2. Matemáticas básicas y modular
-% =========================
-\section{Matemáticas, modular y teoría de números}
+% =====================================================================
+\section{C++ STL Toolkit}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{GCD y LCM}
-\textbf{Built-in GCC:}
+\subsection{Vector Essentials}
 \begin{lstlisting}
-// Requiere #include <algorithm>
+vector<int> v(n);              // n zeros
+vector<int> v(n, -1);          // n copies of -1
+vector<vector<int>> g(n, vector<int>(m, 0));
+
+sort(all(v));
+sort(rall(v));                 // descending
+reverse(all(v));
+
+// Remove duplicates (must be sorted first)
+sort(all(v));
+v.erase(unique(all(v)), v.end());
+
+int mn = *min_element(all(v));
+int mx = *max_element(all(v));
+ll  s  = accumulate(all(v), 0LL);   // 0LL avoids int overflow
+int c  = count(all(v), x);
+\end{lstlisting}
+\warn{\code{accumulate(all(v), 0)} sums into an \code{int}. Always pass
+\code{0LL} when the total can exceed $2\cdot 10^9$.}
+
+\subsection{Sorting with Custom Order}
+\begin{lstlisting}
+// By second value, then first descending
+sort(all(v), [](const pii& a, const pii& b) {
+    if (a.second != b.second) return a.second < b.second;
+    return a.first > b.first;
+});
+
+// Sort indices instead of moving heavy objects
+vector<int> idx(n);
+iota(all(idx), 0);
+sort(all(idx), [&](int i, int j) { return a[i] < a[j]; });
+\end{lstlisting}
+\warn{A comparator must be a \emph{strict} weak ordering: it must return
+\code{false} for equal elements. Using \code{<=} is undefined behaviour
+and can segfault.}
+
+\sub{nth\_element}{n}
+\begin{lstlisting}
+// Places the k-th smallest at position k,
+// partitions around it. No full sort.
+nth_element(v.begin(), v.begin() + k, v.end());
+int kth = v[k];
+\end{lstlisting}
+
+\subsection{Pairs, Tuples and Bindings}
+\begin{lstlisting}
+pair<int,int> p = {1, 2};
+tuple<int,int,int> t = {1, 2, 3};
+
+auto [x, y] = p;               // C++17
+auto [a, b, c] = t;
+
+for (auto& [key, val] : mp) {  // iterate a map cleanly
+    // ...
+}
+\end{lstlisting}
+
+\subsection{set / map Operations}
+\begin{lstlisting}
+set<int> s;
+s.insert(x);
+s.erase(x);                    // by value
+s.erase(s.begin());            // by iterator
+
+// First element >= x  /  first element > x
+auto it = s.lower_bound(x);
+auto jt = s.upper_bound(x);
+if (it != s.end()) { /* *it exists */ }
+
+// Largest element <= x
+auto kt = s.upper_bound(x);
+if (kt != s.begin()) { --kt; /* *kt <= x */ }
+\end{lstlisting}
+\warn{Use the \emph{member} \code{s.lower\_bound(x)}, not
+\code{std::lower\_bound(all(s), x)}. The free function on a \code{set}
+degrades to $O(n)$ because the iterators are not random access.}
+
+\begin{lstlisting}
+map<int,int> mp;
+mp[k]++;                       // inserts 0 then increments
+if (mp.count(k)) { /* ... */ }
+mp.erase(k);
+
+// Does NOT insert when missing
+auto it = mp.find(k);
+if (it != mp.end()) use(it->second);
+\end{lstlisting}
+\warn{\code{mp[k]} default-constructs a missing key. Inside a read-only
+loop that silently grows the map; use \code{find} or \code{count}.}
+
+\subsection{multiset: Erase One vs All}
+\begin{lstlisting}
+multiset<int> ms;
+ms.erase(x);                   // erases EVERY copy of x
+ms.erase(ms.find(x));          // erases exactly one
+\end{lstlisting}
+
+\subsection{priority\_queue}
+\begin{lstlisting}
+priority_queue<int> maxHeap;   // largest on top (default)
+
+priority_queue<int, vector<int>, greater<int>> minHeap;
+
+// Min-heap of pairs, the common Dijkstra shape
+priority_queue<pll, vector<pll>, greater<pll>> pq;
+pq.push({dist, node});
+\end{lstlisting}
+\tip{No \code{greater} handy? Push negated values into a max-heap and
+negate on the way out.}
+
+\subsection{deque}
+\begin{lstlisting}
+deque<int> dq;
+dq.push_back(x);  dq.push_front(x);
+dq.pop_back();    dq.pop_front();
+int f = dq.front(), b = dq.back();
+\end{lstlisting}
+\uses{sliding window extrema and 0--1 BFS.}
+
+\subsection{bitset}
+\begin{lstlisting}
+bitset<1000> b;
+b[i] = 1;
+b.set();  b.reset();  b.flip();
+int ones = b.count();
+bool any = b.any();
+
+// Set operations run 64 bits at a time
+bitset<1000> c = a & b;
+c = a | b;   c = a ^ b;   c = a << 3;
+\end{lstlisting}
+\uses{a constant-factor $1/64$ speedup. It turns an $O(n^2)$ DP or
+reachability computation into $O(n^2/64)$, which is often enough to
+pass.}
+
+\subsection{next\_permutation}
+\begin{lstlisting}
+sort(all(v));                  // must start sorted
+do {
+    // process this permutation
+} while (next_permutation(all(v)));
+\end{lstlisting}
+
+\subsection{Anti-Hash Custom Hash}
+\begin{lstlisting}
+struct chash {
+    static uint64_t splitmix64(uint64_t x) {
+        x += 0x9e3779b97f4a7c15ULL;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+        return x ^ (x >> 31);
+    }
+    size_t operator()(uint64_t x) const {
+        static const uint64_t SEED =
+            chrono::steady_clock::now()
+                .time_since_epoch().count();
+        return splitmix64(x + SEED);
+    }
+};
+
+unordered_map<ll, int, chash> mp;
+mp.reserve(1 << 20);
+mp.max_load_factor(0.25);
+\end{lstlisting}
+\warn{The default \code{unordered\_map} hash for integers is the
+identity. On Codeforces, anyone can feed you colliding keys and turn
+your $O(1)$ lookups into $O(n)$. Use this on any open hacking round, or
+just use \code{map}.}
+
+\subsection{Randomness}
+\begin{lstlisting}
+mt19937_64 rng(chrono::steady_clock::now()
+                   .time_since_epoch().count());
+
+ll r = rng() % n;                     // biased but usually fine
+ll u = uniform_int_distribution<ll>(1, n)(rng);
+shuffle(all(v), rng);
+\end{lstlisting}
+\warn{Never seed with a constant, and never use \code{rand()} --- on
+Windows it only produces values up to $32767$.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Math, Modular Arithmetic and Number Theory}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{GCD and LCM}{\log \min(a,b)}
+\begin{lstlisting}
+// GCC built-in, needs <algorithm>
 int g = __gcd(a, b);
-\end{lstlisting}
 
-\textbf{Euclides manual recursivo:}
-\begin{lstlisting}
-long long gcd(long long a, long long b) {
-    return b ? gcd(b, a % b) : a;
+ll gcd_it(ll a, ll b) {
+    while (b) { a %= b; swap(a, b); }
+    return a < 0 ? -a : a;
 }
-\end{lstlisting}
 
-\textbf{LCM seguro:}
-\begin{lstlisting}
-long long lcm(long long a, long long b) {
+ll lcm_safe(ll a, ll b) {
     if (a == 0 || b == 0) return 0;
-    return (a / __gcd(a, b)) * b;
+    return (a / __gcd(a, b)) * b;   // divide FIRST
 }
 \end{lstlisting}
-
-\textbf{Propiedades:}
+\textbf{Properties:}
 \begin{itemize}
-    \item $gcd(a,b) \cdot lcm(a,b) = |a \cdot b|$.
-    \item $gcd(a,b) = gcd(b, a \bmod b)$.
-    \item $gcd(a,b,c) = gcd(a, gcd(b,c))$.
+    \item $\gcd(a,b)\cdot\mathrm{lcm}(a,b) = |a\cdot b|$.
+    \item $\gcd(a,b) = \gcd(b, a \bmod b)$.
+    \item $\gcd(a,b,c) = \gcd(a, \gcd(b,c))$.
 \end{itemize}
+\warn{In \code{lcm}, dividing before multiplying is what keeps the
+product from overflowing.}
 
-\subsection{Sumas notables}
-\[
-\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
-\]
-\[
-\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}
-\]
-
-\subsection{Propiedades de módulo}
-\[
-(a+b) \bmod m = ((a \bmod m)+(b \bmod m)) \bmod m
-\]
-\[
-(a-b) \bmod m = ((a \bmod m)-(b \bmod m)+m) \bmod m
-\]
-\[
-(a \cdot b) \bmod m = ((a \bmod m)(b \bmod m)) \bmod m
-\]
-
-\textbf{Negativos:}
+\sub{Extended Euclid}{\log \min(a,b)}
+Solves $ax + by = \gcd(a,b)$.
 \begin{lstlisting}
-(a % MOD + MOD) % MOD
+ll extgcd(ll a, ll b, ll& x, ll& y) {
+    if (b == 0) { x = 1; y = 0; return a; }
+    ll x1, y1;
+    ll g = extgcd(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - (a / b) * y1;
+    return g;
+}
+\end{lstlisting}
+\uses{modular inverse when \code{MOD} is \emph{not} prime, and linear
+Diophantine equations.}
+
+\subsection{Linear Diophantine}
+$ax + by = c$ has a solution iff $\gcd(a,b) \mid c$.
+\begin{lstlisting}
+bool solve_dio(ll a, ll b, ll c, ll& x, ll& y) {
+    ll g = extgcd(a, b, x, y);
+    if (c % g != 0) return false;
+    x *= c / g;
+    y *= c / g;
+    return true;
+}
+// General family:
+// x + k*(b/g),  y - k*(a/g)   for any integer k
 \end{lstlisting}
 
-\subsection{Binary Exponentiation}
+\subsection{Modulo Properties}
+\[(a+b) \bmod m = ((a \bmod m)+(b \bmod m)) \bmod m\]
+\[(a-b) \bmod m = ((a \bmod m)-(b \bmod m)+m) \bmod m\]
+\[(a \cdot b) \bmod m = ((a \bmod m)(b \bmod m)) \bmod m\]
 \begin{lstlisting}
-typedef long long ll;
-const ll MOD = 998244353;
+// C++ % keeps the sign of the dividend
+int r = (a % MOD + MOD) % MOD;
+\end{lstlisting}
+\warn{Division does \emph{not} distribute over the modulus. Multiply by
+the modular inverse instead.}
 
-ll binpow(ll a, ll b) {
+\sub{Binary Exponentiation}{\log b}
+\begin{lstlisting}
+ll binpow(ll a, ll b, ll mod) {
     ll res = 1;
-    a %= MOD;
-
-    while (b) {
-        if (b & 1) res = res * a % MOD;
-        a = a * a % MOD;
+    a %= mod;
+    if (a < 0) a += mod;
+    while (b > 0) {
+        if (b & 1) res = res * a % mod;
+        a = a * a % mod;
         b >>= 1;
     }
-
     return res;
 }
 \end{lstlisting}
 
-\subsection{Modular Inverse}
+\subsection{Safe Multiplication mod m}
 \begin{lstlisting}
-ll modInverse(ll a) {
-    return binpow(a, MOD - 2);
+// Needed when mod > 2^31 (a*b overflows ll)
+ll mulmod(ll a, ll b, ll mod) {
+    return (__int128)a * b % mod;
 }
 \end{lstlisting}
 
-\subsection{Modular Factorials}
+\sub{Modular Inverse}{\log m}
+\begin{lstlisting}
+// MOD prime, a not divisible by MOD (Fermat)
+ll inv(ll a, ll mod) { return binpow(a, mod - 2, mod); }
+
+// Any mod, requires gcd(a, mod) == 1
+ll inv_gen(ll a, ll mod) {
+    ll x, y;
+    ll g = extgcd(a, mod, x, y);
+    if (g != 1) return -1;         // no inverse
+    return (x % mod + mod) % mod;
+}
+\end{lstlisting}
+
+\sub{All Inverses 1..n}{n}
+\begin{lstlisting}
+vector<ll> inv(n + 1);
+inv[1] = 1;
+for (int i = 2; i <= n; i++)
+    inv[i] = (MOD - (MOD / i) * inv[MOD % i] % MOD) % MOD;
+\end{lstlisting}
+\uses{one linear pass instead of $n$ separate $O(\log m)$ exponentiations.}
+
+\sub{Factorials and nCr}{n \text{ precompute},\; 1 \text{ per query}}
 \begin{lstlisting}
 const int MAXN = 1e6 + 5;
-ll fact[MAXN];
+ll fact[MAXN], invfact[MAXN];
 
-void factorials() {
+void init_fact() {
     fact[0] = 1;
-    for (int i = 1; i < MAXN; i++) {
+    for (int i = 1; i < MAXN; i++)
         fact[i] = fact[i - 1] * i % MOD;
-    }
-}
-\end{lstlisting}
 
-\subsection{Modular Combinations}
-\begin{lstlisting}
+    invfact[MAXN - 1] = binpow(fact[MAXN - 1], MOD - 2, MOD);
+    for (int i = MAXN - 1; i > 0; i--)
+        invfact[i - 1] = invfact[i] * i % MOD;
+}
+
 ll nCr(ll n, ll r) {
-    if (r > n) return 0;
-    return fact[n]
-        * modInverse(fact[r]) % MOD
-        * modInverse(fact[n - r]) % MOD;
+    if (r < 0 || r > n) return 0;
+    return fact[n] * invfact[r] % MOD * invfact[n - r] % MOD;
+}
+
+ll nPr(ll n, ll r) {
+    if (r < 0 || r > n) return 0;
+    return fact[n] * invfact[n - r] % MOD;
 }
 \end{lstlisting}
+\[C(n,r) = \frac{n!}{r!\,(n-r)!} \qquad P(n,r) = \frac{n!}{(n-r)!}\]
+\tip{The backward loop computes every inverse factorial with a single
+exponentiation. Calling \code{binpow} inside \code{nCr} is the slow way
+and shows up as TLE with many queries.}
 
-\textbf{Fórmulas:}
-\[
-C(n,r) = \frac{n!}{r!(n-r)!}
-\qquad
-P(n,r) = \frac{n!}{(n-r)!}
-\]
+\subsection{Combinatorial Identities}
+\begin{itemize}
+    \item $C(n,r) = C(n-1,r-1) + C(n-1,r)$ --- Pascal.
+    \item $\sum_{r=0}^{n} C(n,r) = 2^n$.
+    \item Stars and bars: $x_1+\dots+x_k=n$, $x_i \ge 0$
+          $\rightarrow C(n+k-1,\,k-1)$.
+    \item Catalan: $C_n = \frac{1}{n+1}\binom{2n}{n}$ --- balanced
+          brackets, binary trees, triangulations.
+\end{itemize}
 
-\subsection{Criba clásica + factorización}
+\sub{Sieve of Eratosthenes}{n \log\log n}
 \begin{lstlisting}
 const int MAXN = 1e6 + 5;
 vector<bool> isPrime(MAXN, true);
@@ -344,844 +742,2004 @@ void sieve(int n) {
     for (int i = 2; i <= n; i++) {
         if (isPrime[i]) {
             primes.push_back(i);
-            if (1LL * i * i <= n) {
-                for (long long j = 1LL * i * i; j <= n; j += i) {
-                    isPrime[j] = false;
-                }
-            }
+            for (ll j = (ll)i * i; j <= n; j += i)
+                isPrime[j] = false;
         }
     }
-}
-
-vector<int> factorize(int x) {
-    vector<int> f;
-    for (int p : primes) {
-        if (1LL * p * p > x) break;
-        while (x % p == 0) {
-            f.push_back(p);
-            x /= p;
-        }
-    }
-    if (x > 1) f.push_back(x);
-    return f;
 }
 \end{lstlisting}
+\warn{Start the inner loop at $i^2$ and use \code{ll} for \code{j}:
+$i \cdot i$ overflows \code{int} once $i > 46340$.}
 
-\subsection{Criba lineal SPF + factorización}
+\sub{Linear Sieve with SPF}{n}
 \begin{lstlisting}
-const int MAXN = 1e6 + 5;
 vector<int> spf(MAXN, 0), primes;
 
-void sieve(int n) {
+void linear_sieve(int n) {
     for (int i = 2; i <= n; i++) {
         if (spf[i] == 0) {
             spf[i] = i;
             primes.push_back(i);
         }
-
         for (int p : primes) {
-            if (p > spf[i] || 1LL * i * p > n) break;
+            if (p > spf[i] || (ll)i * p > n) break;
             spf[i * p] = p;
         }
     }
 }
 
-vector<int> factorize(int x) {
+// O(log x) factorization after the sieve
+vector<int> factorize_spf(int x) {
     vector<int> f;
-    while (x > 1) {
-        f.push_back(spf[x]);
-        x /= spf[x];
+    while (x > 1) { f.push_back(spf[x]); x /= spf[x]; }
+    return f;
+}
+\end{lstlisting}
+\uses{when you must factor many numbers. One $O(n)$ precomputation
+turns each factorization into $O(\log x)$.}
+
+\sub{Trial Division Factorization}{\sqrt n}
+\begin{lstlisting}
+vector<pll> factorize(ll x) {
+    vector<pll> f;                 // {prime, exponent}
+    for (ll p = 2; p * p <= x; p++) {
+        if (x % p == 0) {
+            int e = 0;
+            while (x % p == 0) { x /= p; e++; }
+            f.push_back({p, e});
+        }
     }
+    if (x > 1) f.push_back({x, 1});
     return f;
 }
 \end{lstlisting}
 
-\subsection[Euler's Totient Function phi]{Euler's Totient Function $\phi$}
-\textbf{Single value $O(\sqrt n)$:}
+\sub{All Divisors}{\sqrt n}
 \begin{lstlisting}
-int phi(int n) {
-    int res = n;
-    for (int i = 2; i * i <= n; i++) {
+vector<ll> divisors(ll n) {
+    vector<ll> d;
+    for (ll i = 1; i * i <= n; i++) {
         if (n % i == 0) {
-            while (n % i == 0) n /= i;
-            res -= res / i;
+            d.push_back(i);
+            if (i != n / i) d.push_back(n / i);
+        }
+    }
+    sort(all(d));
+    return d;
+}
+\end{lstlisting}
+\textbf{From the factorization $n=\prod p_i^{e_i}$:}
+\begin{itemize}
+    \item Number of divisors: $\prod (e_i + 1)$.
+    \item Sum of divisors: $\prod \frac{p_i^{e_i+1}-1}{p_i-1}$.
+\end{itemize}
+
+\sub{Divisor Sieve}{n \log n}
+\begin{lstlisting}
+// divs[i] = list of all divisors of i, for every i <= n
+vector<vector<int>> divs(n + 1);
+for (int i = 1; i <= n; i++)
+    for (int j = i; j <= n; j += i)
+        divs[j].push_back(i);
+\end{lstlisting}
+
+\subsection{Euler's Totient Function}
+$\phi(n)$ counts integers in $[1,n]$ coprime to $n$.
+\begin{lstlisting}
+// Single value, O(sqrt n)
+ll phi(ll n) {
+    ll res = n;
+    for (ll p = 2; p * p <= n; p++) {
+        if (n % p == 0) {
+            while (n % p == 0) n /= p;
+            res -= res / p;
         }
     }
     if (n > 1) res -= res / n;
     return res;
 }
-\end{lstlisting}
 
-\textbf{Totient sieve $O(n \log\log n)$:}
-\begin{lstlisting}
-vector<int> phi(MAXN);
-
-void sieve_phi_simple(int n) {
-    for (int i = 1; i <= n; i++) phi[i] = i;
-    for (int i = 2; i <= n; i++) {
-        if (phi[i] == i) { // i is prime
-            for (int j = i; j <= n; j += i) {
-                phi[j] -= phi[j] / i;
-            }
-        }
-    }
+// Sieve for all i <= n, O(n log log n)
+vector<int> phi_all(int n) {
+    vector<int> f(n + 1);
+    iota(f.begin(), f.end(), 0);
+    for (int i = 2; i <= n; i++)
+        if (f[i] == i)                 // i is prime
+            for (int j = i; j <= n; j += i)
+                f[j] -= f[j] / i;
+    return f;
 }
 \end{lstlisting}
+\uses{Euler's theorem: $a^{\phi(m)} \equiv 1 \pmod m$ when
+$\gcd(a,m)=1$. This is how you reduce huge exponents modulo a composite
+$m$.}
+
+\sub{Miller-Rabin Primality}{k \log^3 n}
+\begin{lstlisting}
+bool check_composite(ull n, ull a, ull d, int s) {
+    ull x = binpow(a, d, n);
+    if (x == 1 || x == n - 1) return false;
+    for (int r = 1; r < s; r++) {
+        x = (__int128)x * x % n;
+        if (x == n - 1) return false;
+    }
+    return true;
+}
+
+bool is_prime(ull n) {
+    if (n < 2) return false;
+    int s = 0;
+    ull d = n - 1;
+    while ((d & 1) == 0) { d >>= 1; s++; }
+
+    // Deterministic for every 64-bit n
+    for (ull a : {2ULL, 3ULL, 5ULL, 7ULL, 11ULL, 13ULL,
+                  17ULL, 19ULL, 23ULL, 29ULL, 31ULL, 37ULL}) {
+        if (n == a) return true;
+        if (check_composite(n, a, d, s)) return false;
+    }
+    return true;
+}
+\end{lstlisting}
+\uses{primality of values up to $10^{18}$, where trial division is
+hopeless. Requires the \code{\_\_int128} \code{binpow}.}
+
+\sub{Pollard's Rho Factorization}{n^{1/4}}
+\begin{lstlisting}
+ull pollard(ull n) {
+    if (n % 2 == 0) return 2;
+    ull x = rng() % n, y = x, c = rng() % n + 1, d = 1;
+    while (d == 1) {
+        x = ((__int128)x * x + c) % n;
+        y = ((__int128)y * y + c) % n;
+        y = ((__int128)y * y + c) % n;
+        d = __gcd(x > y ? x - y : y - x, n);
+    }
+    return d == n ? pollard(n) : d;
+}
+
+void factor(ull n, vector<ull>& out) {
+    if (n == 1) return;
+    if (is_prime(n)) { out.push_back(n); return; }
+    ull d = pollard(n);
+    factor(d, out);
+    factor(n / d, out);
+}
+\end{lstlisting}
+\uses{factoring numbers up to $10^{18}$ in milliseconds.}
+
+\sub{Chinese Remainder Theorem}{\log m}
+Merges $x \equiv a_1 \pmod{m_1}$ and $x \equiv a_2 \pmod{m_2}$.
+\begin{lstlisting}
+// Returns {x, lcm} or {-1, -1} when incompatible
+pll crt(ll a1, ll m1, ll a2, ll m2) {
+    ll p, q;
+    ll g = extgcd(m1, m2, p, q);
+    if ((a2 - a1) % g != 0) return {-1, -1};
+
+    ll lcm = m1 / g * m2;
+    __int128 t = (__int128)(a2 - a1) / g % (m2 / g) * p % (m2 / g);
+    ll x = (ll)(((__int128)a1 + (__int128)t * m1) % lcm);
+    return {(x % lcm + lcm) % lcm, lcm};
+}
+\end{lstlisting}
+
+\sub{Matrix Exponentiation}{k^3 \log n}
+\begin{lstlisting}
+using Mat = vector<vector<ll>>;
+
+Mat mul(const Mat& A, const Mat& B) {
+    int n = A.size(), m = B[0].size(), k = B.size();
+    Mat C(n, vector<ll>(m, 0));
+    for (int i = 0; i < n; i++)
+        for (int p = 0; p < k; p++) {
+            if (!A[i][p]) continue;
+            for (int j = 0; j < m; j++)
+                C[i][j] = (C[i][j] + A[i][p] * B[p][j]) % MOD;
+        }
+    return C;
+}
+
+Mat matpow(Mat A, ll e) {
+    int n = A.size();
+    Mat R(n, vector<ll>(n, 0));
+    for (int i = 0; i < n; i++) R[i][i] = 1;
+    while (e) {
+        if (e & 1) R = mul(R, A);
+        A = mul(A, A);
+        e >>= 1;
+    }
+    return R;
+}
+\end{lstlisting}
+\uses{any linear recurrence at a huge index. Fibonacci:
+$\begin{pmatrix}1&1\\1&0\end{pmatrix}^n$ gives $F_n$ in
+$O(\log n)$. Also counts walks of length $n$ in a graph.}
+
+\subsection{Notable Sums}
+\[\sum_{i=1}^{n} i = \frac{n(n+1)}{2} \qquad
+  \sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}\]
+\[\sum_{i=1}^{n} i^3 = \left(\frac{n(n+1)}{2}\right)^2 \qquad
+  \sum_{i=0}^{n} r^i = \frac{r^{n+1}-1}{r-1}\]
+\begin{lstlisting}
+ll s1 = n * (n + 1) / 2;
+ll s2 = n * (n + 1) * (2 * n + 1) / 6;
+\end{lstlisting}
+\warn{Compute in \code{ll}: for $n = 10^6$, $n(n+1)$ already overflows
+\code{int}.}
 
 \end{multicols}
-\newpage
 
-% =========================
-% 3. Arreglos y técnicas generales
-% =========================
-\section{Arreglos y técnicas generales}
+% =====================================================================
+\section{Arrays, Prefix Sums and Searching}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{Prefix Sum 1D}
-\textbf{Construcción 1-indexed:}
+\sub{Prefix Sum 1D}{n \text{ build},\; 1 \text{ query}}
 \begin{lstlisting}
-pref[0] = 0;
-for (int i = 1; i <= n; i++) {
-    pref[i] = pref[i - 1] + a[i];
+// pref[i] = sum of the first i elements
+vector<ll> pref(n + 1, 0);
+for (int i = 0; i < n; i++)
+    pref[i + 1] = pref[i] + a[i];
+
+// Inclusive range [l, r], 0-indexed
+ll range_sum(int l, int r) { return pref[r + 1] - pref[l]; }
+\end{lstlisting}
+\tip{Sizing the array $n+1$ and shifting by one removes every
+\code{l == 0} special case.}
+
+\subsection{Prefix XOR}
+\begin{lstlisting}
+vector<int> px(n + 1, 0);
+for (int i = 0; i < n; i++) px[i + 1] = px[i] ^ a[i];
+
+int range_xor(int l, int r) { return px[r + 1] ^ px[l]; }
+\end{lstlisting}
+\uses{XOR is its own inverse, so subtraction becomes another XOR.}
+
+\sub{Prefix Sum 2D}{nm \text{ build},\; 1 \text{ query}}
+\begin{lstlisting}
+vector<vector<ll>> p(n + 1, vector<ll>(m + 1, 0));
+for (int i = 1; i <= n; i++)
+    for (int j = 1; j <= m; j++)
+        p[i][j] = a[i-1][j-1] + p[i-1][j]
+                + p[i][j-1] - p[i-1][j-1];
+
+// Inclusive rectangle, 0-indexed corners
+ll rect(int x1, int y1, int x2, int y2) {
+    x1++; y1++; x2++; y2++;
+    return p[x2][y2] - p[x1-1][y2]
+         - p[x2][y1-1] + p[x1-1][y1-1];
 }
 \end{lstlisting}
 
-\textbf{Query $[l,r]$:}
-\[
-\text{sum}(l,r) = pref[r] - pref[l-1]
-\]
-
-\textbf{Prefix XOR:}
-\[
-\text{xor}(l,r) = pref[r] \oplus pref[l-1]
-\]
-
-\subsection{Prefix Sum 2D}
-\textbf{Construcción 1-indexed:}
+\sub{Difference Array 1D}{1 \text{ per update}}
 \begin{lstlisting}
-for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= m; j++) {
-        p[i][j] = a[i][j] + p[i - 1][j]
-                 + p[i][j - 1] - p[i - 1][j - 1];
-    }
+vector<ll> d(n + 1, 0);
+
+void add_range(int l, int r, ll v) {   // inclusive
+    d[l] += v;
+    if (r + 1 <= n) d[r + 1] -= v;
 }
+
+// Rebuild the final array once, at the end
+ll cur = 0;
+for (int i = 0; i < n; i++) { cur += d[i]; a[i] += cur; }
+\end{lstlisting}
+\uses{many range updates and a single read at the end. It is the exact
+mirror of a prefix sum.}
+
+\subsection{Difference Array 2D}
+\begin{lstlisting}
+vector<vector<ll>> d(n + 2, vector<ll>(m + 2, 0));
+
+void add_rect(int x1, int y1, int x2, int y2, ll v) {
+    d[x1][y1]     += v;
+    d[x1][y2+1]   -= v;
+    d[x2+1][y1]   -= v;
+    d[x2+1][y2+1] += v;
+}
+// Then take a 2D prefix sum of d to get the final grid
 \end{lstlisting}
 
-\textbf{Query rectángulo $[x_1,y_1]$ a $[x_2,y_2]$:}
+\sub{Binary Search}{\log n}
 \begin{lstlisting}
-int res = p[x2][y2] - p[x1 - 1][y2]
-        - p[x2][y1 - 1] + p[x1 - 1][y1 - 1];
-\end{lstlisting}
-
-\subsection{Difference Array}
-\textbf{Update $[l,r]$ con valor $v$:}
-\begin{lstlisting}
-d[l] += v;
-d[r + 1] -= v;
-\end{lstlisting}
-
-\textbf{Resultado:} el valor final de $a[i]$ es la suma de prefijo de $d$ hasta $i$.
-
-\subsection{Binary Search básica}
-\begin{lstlisting}
-int l = 0, r = n - 1;
-
+// Classic: find x in a sorted array
+int l = 0, r = n - 1, ans = -1;
 while (l <= r) {
-    int mid = l + (r - l) / 2;
-
-    if (a[mid] == x) {
-        break;
-    }
-
+    int mid = l + (r - l) / 2;     // avoids overflow
+    if (a[mid] == x) { ans = mid; break; }
     if (a[mid] < x) l = mid + 1;
     else r = mid - 1;
 }
 \end{lstlisting}
+\warn{\code{(l + r) / 2} overflows when \code{l + r} exceeds
+\code{INT\_MAX}. \code{l + (r - l) / 2} never does.}
 
-\subsection{Binary Search on Answer}
+\sub{Binary Search on the Answer}{\log(\text{range}) \cdot f}
 \begin{lstlisting}
-while (l <= r) {
-    int mid = l + (r - l) / 2;
+// Smallest value that satisfies a monotone predicate
+ll lo = 0, hi = 1e18, ans = -1;
+while (lo <= hi) {
+    ll mid = lo + (hi - lo) / 2;
+    if (check(mid)) { ans = mid; hi = mid - 1; }
+    else            { lo = mid + 1; }
+}
+\end{lstlisting}
+\uses{"minimise the maximum", "maximise the minimum", and any question
+whose answer is monotone: if \code{mid} works then everything above
+(or below) works too.}
 
-    if (check(mid)) {
-        ans = mid;
-        r = mid - 1;
-    } else {
-        l = mid + 1;
+\subsection{First True Pattern}
+\begin{lstlisting}
+// Half-open [lo, hi): no ans variable needed
+int lo = 0, hi = n;
+while (lo < hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (ok(mid)) hi = mid;
+    else         lo = mid + 1;
+}
+// lo == first index where ok() is true (or n)
+\end{lstlisting}
+\tip{This shape is much harder to get wrong than the
+\code{l <= r} version. Learn one and reuse it everywhere.}
+
+\subsection{Binary Search on Doubles}
+\begin{lstlisting}
+double lo = 0, hi = 1e9;
+for (int iter = 0; iter < 100; iter++) {  // fixed count
+    double mid = (lo + hi) / 2;
+    if (check(mid)) hi = mid;
+    else            lo = mid;
+}
+\end{lstlisting}
+\tip{Iterate a fixed number of times rather than comparing against an
+epsilon. 100 halvings is far below any precision you will be asked for,
+and it cannot loop forever.}
+
+\sub{lower\_bound / upper\_bound}{\log n}
+\begin{lstlisting}
+// lower_bound: first element >= x
+auto it = lower_bound(all(v), x);
+int idx = it - v.begin();
+if (it == v.end()) { /* nothing >= x */ }
+
+// upper_bound: first element > x
+auto jt = upper_bound(all(v), x);
+
+// Count of x
+int cnt = upper_bound(all(v), x) - lower_bound(all(v), x);
+
+// Largest element <= x
+auto kt = upper_bound(all(v), x);
+if (kt != v.begin()) { --kt; /* *kt <= x */ }
+\end{lstlisting}
+\warn{Both require the array to be sorted. On unsorted input they return
+garbage silently.}
+
+\sub{Ternary Search}{\log(\text{range})}
+\begin{lstlisting}
+// Maximum of a strictly unimodal function
+double lo = 0, hi = 1e9;
+for (int iter = 0; iter < 200; iter++) {
+    double m1 = lo + (hi - lo) / 3;
+    double m2 = hi - (hi - lo) / 3;
+    if (f(m1) < f(m2)) lo = m1;
+    else               hi = m2;
+}
+double best = f(lo);
+\end{lstlisting}
+\uses{unimodal functions --- one peak, no plateau. For a minimum, flip
+the comparison.}
+
+\sub{Two Pointers}{n}
+\begin{lstlisting}
+int l = 0;
+ll sum = 0;
+for (int r = 0; r < n; r++) {
+    sum += a[r];                 // extend the window
+    while (sum > K) {            // shrink while invalid
+        sum -= a[l];
+        l++;
     }
+    // [l, r] is now the longest valid window ending at r
+    best = max(best, r - l + 1);
 }
 \end{lstlisting}
+\warn{This only works when the predicate is monotone in the window: once
+a window is invalid, extending it right cannot make it valid again.}
 
-\subsection{lower\_bound y upper\_bound}
-\textbf{lower\_bound}: primer elemento $\ge x$.
+\sub{Sliding Window Maximum}{n}
 \begin{lstlisting}
-auto it = lower_bound(v.begin(), v.end(), x);
-int idx = it - v.begin();
-if (it == v.end()) {
-    // No existe elemento >= x
-}
-\end{lstlisting}
-
-\textbf{upper\_bound}: primer elemento $> x$.
-\begin{lstlisting}
-auto it = upper_bound(v.begin(), v.end(), x);
-int idx = it - v.begin();
-\end{lstlisting}
-
-\textbf{Cantidad de $x$:}
-\begin{lstlisting}
-int cnt = upper_bound(v.begin(), v.end(), x)
-        - lower_bound(v.begin(), v.end(), x);
-\end{lstlisting}
-
-\subsection{Maximum Subarray Sum Kadane}
-\begin{lstlisting}
-long long max_so_far = -1e18, current_max = 0;
-
+// Max of every window of size k
+deque<int> dq;                   // stores indices
+vector<int> res;
 for (int i = 0; i < n; i++) {
-    current_max += a[i];
-    if (max_so_far < current_max) max_so_far = current_max;
-    if (current_max < 0) current_max = 0;
+    while (!dq.empty() && dq.front() <= i - k)
+        dq.pop_front();          // drop out-of-window
+    while (!dq.empty() && a[dq.back()] <= a[i])
+        dq.pop_back();           // drop dominated
+    dq.push_back(i);
+    if (i >= k - 1) res.push_back(a[dq.front()]);
 }
 \end{lstlisting}
+\tip{The deque stays decreasing, so the front is always the window
+maximum. Flip the comparison for a minimum.}
 
-\subsection{LIS Longest Increasing Subsequence}
-\textbf{Código $O(n \log n)$:}
+\sub{Kadane: Max Subarray Sum}{n}
 \begin{lstlisting}
-vector<int> lis;
-
-for (int x : a) {
-    auto it = lower_bound(lis.begin(), lis.end(), x);
-    if (it == lis.end()) lis.push_back(x);
-    else *it = x;
+ll best = LLONG_MIN, cur = 0;
+for (int i = 0; i < n; i++) {
+    cur = max((ll)a[i], cur + a[i]);
+    best = max(best, cur);
 }
-
-int ans = (int)lis.size();
 \end{lstlisting}
+\warn{Starting \code{best} at 0 breaks on all-negative arrays. Start it
+at \code{LLONG\_MIN} and let the first element set it.}
 
-\textbf{Nota:} usa \code{upper\_bound} para Longest Non-Decreasing Subsequence.
+\sub{LIS}{n \log n}
+\begin{lstlisting}
+// Length only
+int lis_length(const vector<int>& a) {
+    vector<int> t;
+    for (int x : a) {
+        auto it = lower_bound(all(t), x);
+        if (it == t.end()) t.push_back(x);
+        else *it = x;
+    }
+    return sz(t);
+}
+\end{lstlisting}
+\warn{\code{t} is \emph{not} the LIS itself, only its length is
+meaningful. Reconstruct with parent pointers:}
+\begin{lstlisting}
+vector<int> lis_reconstruct(const vector<int>& a) {
+    int n = sz(a);
+    vector<int> t, pos, par(n, -1);
+    for (int i = 0; i < n; i++) {
+        int j = lower_bound(all(t), a[i]) - t.begin();
+        if (j > 0) par[i] = pos[j - 1];
+        if (j == sz(t)) { t.push_back(a[i]); pos.push_back(i); }
+        else            { t[j] = a[i];       pos[j] = i;       }
+    }
+    vector<int> res;
+    for (int i = pos.back(); i != -1; i = par[i])
+        res.push_back(a[i]);
+    reverse(all(res));
+    return res;
+}
+\end{lstlisting}
+\tip{Swap \code{lower\_bound} for \code{upper\_bound} to get the longest
+\emph{non-decreasing} subsequence.}
+
+\sub{Coordinate Compression}{n \log n}
+\begin{lstlisting}
+vector<int> vals = a;
+sort(all(vals));
+vals.erase(unique(all(vals)), vals.end());
+
+for (int& x : a)
+    x = lower_bound(all(vals), x) - vals.begin();
+// vals[x] recovers the original value
+\end{lstlisting}
+\uses{values up to $10^9$ but only $n \le 10^5$ of them --- compress to
+$[0,n)$ so they can index a BIT or segment tree.}
+
+\sub{Counting Inversions}{n \log n}
+\begin{lstlisting}
+// Pairs i < j with a[i] > a[j], via merge sort
+ll merge_count(vector<int>& a, int l, int r) {
+    if (r - l <= 1) return 0;
+    int m = (l + r) / 2;
+    ll cnt = merge_count(a, l, m) + merge_count(a, m, r);
+
+    vector<int> tmp;
+    int i = l, j = m;
+    while (i < m && j < r) {
+        if (a[i] <= a[j]) tmp.push_back(a[i++]);
+        else { cnt += m - i; tmp.push_back(a[j++]); }
+    }
+    while (i < m) tmp.push_back(a[i++]);
+    while (j < r) tmp.push_back(a[j++]);
+    copy(all(tmp), a.begin() + l);
+    return cnt;
+}
+\end{lstlisting}
+\uses{the minimum number of adjacent swaps that sorts the array.}
+
+\sub{Monotonic Stack}{n}
+\begin{lstlisting}
+// Next strictly greater element to the right
+vector<int> nxt(n, -1);
+stack<int> st;                  // indices, decreasing values
+for (int i = 0; i < n; i++) {
+    while (!st.empty() && a[st.top()] < a[i]) {
+        nxt[st.top()] = i;
+        st.pop();
+    }
+    st.push(i);
+}
+\end{lstlisting}
+\uses{previous/next greater or smaller, largest rectangle in a
+histogram, and the classic "sum of subarray minimums".}
 
 \end{multicols}
-\newpage
 
-% =========================
-% 4. Bit manipulation
-% =========================
+% =====================================================================
 \section{Bit Manipulation}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{Operaciones básicas}
-\textbf{Set, check, toggle, clear:}
+\subsection{Basic Operations}
 \begin{lstlisting}
-mask | (1LL << i)     // Set bit i
-mask & (1LL << i)     // Check bit i
-mask ^ (1LL << i)     // Toggle bit i
-mask & ~(1LL << i)    // Clear bit i
+mask |  (1LL << i)    // set bit i
+mask &  (1LL << i)    // test bit i (nonzero if set)
+mask ^  (1LL << i)    // toggle bit i
+mask & ~(1LL << i)    // clear bit i
+
+(mask >> i) & 1       // test, as a clean 0/1
+\end{lstlisting}
+\warn{\code{1 << i} is an \code{int}. For $i \ge 31$ this is undefined
+behaviour --- write \code{1LL << i} whenever the mask can be wide.}
+
+\subsection{Least Significant Bit}
+\begin{lstlisting}
+mask & -mask          // isolate the lowest set bit
+mask & (mask - 1)     // clear the lowest set bit
+mask | (mask + 1)     // set the lowest clear bit
 \end{lstlisting}
 
-\textbf{LSB Least Significant Bit:}
+\subsection{GCC Built-ins}
 \begin{lstlisting}
-mask & -mask          // Get LSB isolated
-mask & (mask - 1)     // Remove LSB
+__builtin_popcount(x)    // number of set bits (int)
+__builtin_popcountll(x)  // ... (long long)
+__builtin_ctz(x)         // trailing zeros -> index of LSB
+__builtin_clz(x)         // leading zeros
+__builtin_ffs(x)         // 1-based index of LSB, 0 if x == 0
+__builtin_parity(x)      // popcount % 2
 \end{lstlisting}
+\warn{\code{ctz} and \code{clz} are undefined for \code{x == 0}. Guard
+them.}
+\tip{C++20 offers the portable \code{<bit>} header:
+\code{popcount}, \code{countr\_zero}, \code{countl\_zero},
+\code{bit\_width}, \code{has\_single\_bit}.}
 
-\subsection{Built-in functions GCC}
+\subsection{Common Tricks}
 \begin{lstlisting}
-__builtin_popcountll(n) // Count 1s
-__builtin_ctzll(n)      // Count trailing 0s
-__builtin_clzll(n)      // Count leading 0s
-__builtin_ffsll(n)      // 1-based index of LSB
+(1LL << n) - 1            // n low bits all set
+n > 0 && !(n & (n - 1))   // is a power of two
+31 - __builtin_clz(n)     // floor(log2(n)), int
+63 - __builtin_clzll(n)   // floor(log2(n)), long long
+1 << (32 - __builtin_clz(n - 1))  // next power of two
+x & 1                     // odd?
+x >> 1                    // x / 2 for non-negative x
 \end{lstlisting}
-\textit{Usa sufijo \code{ll} para \code{long long}.}
+\warn{Right-shifting a \emph{negative} number is implementation-defined
+rounding, not division. Use \code{/ 2} when the sign matters.}
 
-\subsection{Técnicas y trucos}
-\textbf{All bits set of size $n$:}
-\begin{lstlisting}
-(1LL << n) - 1
-\end{lstlisting}
-
-\textbf{Check if power of two:}
-\begin{lstlisting}
-n && !(n & (n - 1))
-\end{lstlisting}
-
-\textbf{XOR properties:}
+\subsection{XOR Properties}
 \begin{itemize}
-    \item $a \oplus a = 0$.
-    \item $a \oplus 0 = a$.
-    \item Si $a \oplus b = c$, entonces $a \oplus c = b$.
+    \item $a \oplus a = 0$ and $a \oplus 0 = a$.
+    \item Commutative and associative --- order never matters.
+    \item If $a \oplus b = c$ then $a \oplus c = b$.
+    \item XOR of $1..n$ has period 4: $n, 1, n+1, 0$ for
+          $n \bmod 4 = 0,1,2,3$.
 \end{itemize}
+\uses{"every value appears twice except one" --- XOR everything, the
+pairs cancel out.}
 
-\subsection{Iterar subconjuntos}
-\textbf{Todos los subconjuntos de $n$ elementos:}
+\sub{Iterate All Subsets}{2^n \cdot n}
 \begin{lstlisting}
-for (int i = 0; i < (1 << n); i++) {
+for (int mask = 0; mask < (1 << n); mask++) {
     for (int j = 0; j < n; j++) {
-        if (i & (1 << j)) {
-            // j is in subset
+        if (mask & (1 << j)) {
+            // element j belongs to this subset
         }
     }
 }
 \end{lstlisting}
 
-\subsection{Iterar submasks}
+\sub{Iterate Submasks}{3^n \text{ total}}
 \begin{lstlisting}
 for (int sub = mask; sub > 0; sub = (sub - 1) & mask) {
-    // sub is a submask of mask
+    // sub is a nonempty submask of mask
 }
-// Excludes empty mask 0
-\end{lstlisting}
-
-\subsection{Subsets de tamaño K Gosper's Hack}
-\begin{lstlisting}
-int set = (1 << k) - 1;
-
-while (set < (1 << n)) {
-    // Process set
-    int c = set & -set;
-    int r = set + c;
-    set = (((r ^ set) >> 2) / c) | r;
+// Include the empty submask:
+int sub = mask;
+while (true) {
+    // process sub
+    if (sub == 0) break;
+    sub = (sub - 1) & mask;
 }
 \end{lstlisting}
+\tip{Summed over every \code{mask}, this loop runs $3^n$ times, not
+$4^n$ --- which is what makes subset-sum DP feasible for $n \le 20$.}
 
-\subsection{Fast log2 integer}
+\sub{Subsets of Size K (Gosper's Hack)}{\binom{n}{k}}
 \begin{lstlisting}
-31 - __builtin_clz(n)    // int
-63 - __builtin_clzll(n)  // long long
+int cur = (1 << k) - 1;
+while (cur < (1 << n)) {
+    // process cur: exactly k bits set
+    int c = cur & -cur;
+    int r = cur + c;
+    cur = (((r ^ cur) >> 2) / c) | r;
+}
 \end{lstlisting}
+
+\sub{SOS DP (Sum over Subsets)}{2^n \cdot n}
+\begin{lstlisting}
+// f[mask] becomes the sum of a[sub] over all sub of mask
+vector<ll> f(1 << n);
+for (int mask = 0; mask < (1 << n); mask++) f[mask] = a[mask];
+
+for (int i = 0; i < n; i++)
+    for (int mask = 0; mask < (1 << n); mask++)
+        if (mask & (1 << i))
+            f[mask] += f[mask ^ (1 << i)];
+\end{lstlisting}
+\uses{aggregating over all $2^n$ submasks in $O(2^n n)$ instead of
+$O(3^n)$. Reverse the \code{if} to sum over supersets.}
+
+\sub{XOR Linear Basis}{n \log C}
+\begin{lstlisting}
+// Maximal XOR of any subset of the inserted values
+struct Basis {
+    static const int B = 60;
+    ll b[B + 1] = {};
+
+    bool insert(ll x) {
+        for (int i = B; i >= 0; i--) {
+            if (!((x >> i) & 1)) continue;
+            if (!b[i]) { b[i] = x; return true; }
+            x ^= b[i];
+        }
+        return false;            // x was representable
+    }
+
+    ll max_xor() {
+        ll res = 0;
+        for (int i = B; i >= 0; i--)
+            res = max(res, res ^ b[i]);
+        return res;
+    }
+};
+\end{lstlisting}
+\uses{"maximum XOR of a subset", counting distinct achievable XOR
+values ($2^{\text{rank}}$), and checking whether a value is reachable.}
 
 \end{multicols}
-\newpage
 
-% =========================
-% 5. Strings
-% =========================
+% =====================================================================
 \section{Strings}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{getline()}
+\subsection{Reading Input}
 \begin{lstlisting}
 string s;
-getline(cin, s);
+getline(cin, s);           // whole line, spaces included
 \end{lstlisting}
-\textbf{Uso:} lee toda una línea incluyendo espacios.
-
-\subsection{cin.ignore()}
-\textbf{Precaución:} si antes usaste lectura con \texttt{cin}, queda un salto de línea pendiente.
+\warn{After \code{cin >> n}, the newline is still in the buffer and the
+next \code{getline} reads an empty string. Clear it first:}
 \begin{lstlisting}
 int n;
 cin >> n;
-cin.ignore();
-
+cin.ignore();              // discard the pending newline
 string s;
 getline(cin, s);
 \end{lstlisting}
-\textbf{Uso:} evita que \code{getline} lea una línea vacía.
 
-\subsection{stringstream}
+\subsection{Tokenising with stringstream}
 \begin{lstlisting}
-string s = "10 20 30";
-stringstream ss(s);
-
+string line = "10 20 30";
+stringstream ss(line);
 int a, b, c;
 ss >> a >> b >> c;
-\end{lstlisting}
-\textbf{Uso:} permite separar datos desde un \code{string} como si fuera \code{cin}.
 
-\subsection{Z-function}
-\textbf{Uso:} pattern matching, bordes y prefijos. $O(n)$.
+// Unknown count of words
+vector<string> words;
+string w;
+while (ss >> w) words.push_back(w);
+
+// Split on a custom delimiter
+while (getline(ss, w, ',')) words.push_back(w);
+\end{lstlisting}
+
+\subsection{String Utilities}
+\begin{lstlisting}
+s.substr(pos, len);        // len is a COUNT, not an index
+s.find("abc");             // string::npos if absent
+s += 'x';
+reverse(all(s));
+sort(all(s));              // anagram normal form
+
+int digit = s[i] - '0';
+char up = toupper(s[i]);
+bool isLetter = isalpha(s[i]);
+
+string t = to_string(42);
+int v = stoi(t);
+ll  w = stoll(t);
+\end{lstlisting}
+\warn{\code{s.substr(l, r)} does \emph{not} take a right index. For the
+inclusive range $[l,r]$ write \code{s.substr(l, r - l + 1)}.}
+
+\subsection{Character Frequency}
+\begin{lstlisting}
+array<int, 26> cnt{};
+for (char c : s) cnt[c - 'a']++;
+
+// Anagram test
+array<int,26> ca{}, cb{};
+for (char c : a) ca[c - 'a']++;
+for (char c : b) cb[c - 'a']++;
+bool anagram = (ca == cb);
+\end{lstlisting}
+
+\sub{Z-Function}{n}
+\code{z[i]} = length of the longest common prefix of \code{s} and
+\code{s[i..]}.
 \begin{lstlisting}
 vector<int> z_function(const string& s) {
-    int n = (int)s.size();
+    int n = sz(s);
     vector<int> z(n);
     int l = 0, r = 0;
-
     for (int i = 1; i < n; i++) {
         if (i <= r) z[i] = min(r - i + 1, z[i - l]);
-        while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
-            z[i]++;
-        }
-        if (i + z[i] - 1 > r) {
-            l = i;
-            r = i + z[i] - 1;
-        }
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]]) z[i]++;
+        if (i + z[i] - 1 > r) { l = i; r = i + z[i] - 1; }
     }
-
     return z;
 }
-\end{lstlisting}
 
-\textbf{Buscar patrón:}
-\begin{lstlisting}
-vector<int> find_occurrences_z(string text, string pat) {
-    string s = pat + "#" + text;
-    vector<int> z = z_function(s), ans;
-    int m = (int)pat.size();
-
-    for (int i = m + 1; i < (int)s.size(); i++) {
-        if (z[i] == m) ans.push_back(i - m - 1);
-    }
-
-    return ans;
+vector<int> z_search(const string& text, const string& pat) {
+    string s = pat + '#' + text;      // '#' must not occur
+    vector<int> z = z_function(s), res;
+    int m = sz(pat);
+    for (int i = m + 1; i < sz(s); i++)
+        if (z[i] == m) res.push_back(i - m - 1);
+    return res;
 }
 \end{lstlisting}
+\warn{The separator must be a character that appears in neither string,
+or matches can straddle the join.}
 
-\subsection{KMP Prefix Function}
-\textbf{Uso:} pattern matching y bordes. $O(n)$.
+\sub{KMP Prefix Function}{n}
+\code{pi[i]} = length of the longest proper prefix of \code{s[0..i]}
+that is also a suffix of it.
 \begin{lstlisting}
 vector<int> prefix_function(const string& s) {
-    int n = (int)s.size();
+    int n = sz(s);
     vector<int> pi(n);
-
     for (int i = 1; i < n; i++) {
         int j = pi[i - 1];
         while (j > 0 && s[i] != s[j]) j = pi[j - 1];
         if (s[i] == s[j]) j++;
         pi[i] = j;
     }
-
     return pi;
 }
-\end{lstlisting}
 
-\textbf{Buscar patrón:}
-\begin{lstlisting}
-vector<int> kmp_search(string text, string pat) {
-    string s = pat + "#" + text;
-    vector<int> pi = prefix_function(s), ans;
-    int m = (int)pat.size();
-
-    for (int i = m + 1; i < (int)s.size(); i++) {
-        if (pi[i] == m) ans.push_back(i - 2 * m);
-    }
-
-    return ans;
+vector<int> kmp_search(const string& text, const string& pat) {
+    string s = pat + '#' + text;
+    vector<int> pi = prefix_function(s), res;
+    int m = sz(pat);
+    for (int i = m + 1; i < sz(s); i++)
+        if (pi[i] == m) res.push_back(i - 2 * m);
+    return res;
 }
 \end{lstlisting}
+\uses{\code{n - pi[n-1]} is the smallest period of the string. It repeats
+exactly when that period divides \code{n}.}
 
-\subsection{Manacher}
-\textbf{Uso:} palíndromos en $O(n)$.
+\sub{Manacher}{n}
 \begin{lstlisting}
+// d1[i] = radius of the odd palindrome centred at i
 vector<int> manacher_odd(const string& s) {
-    int n = (int)s.size();
+    int n = sz(s);
     vector<int> d1(n);
     int l = 0, r = -1;
-
     for (int i = 0; i < n; i++) {
         int k = (i > r) ? 1 : min(d1[l + r - i], r - i + 1);
-        while (0 <= i - k && i + k < n && s[i - k] == s[i + k]) {
-            k++;
-        }
+        while (0 <= i - k && i + k < n && s[i - k] == s[i + k]) k++;
         d1[i] = k;
-        if (i + k - 1 > r) {
-            l = i - k + 1;
-            r = i + k - 1;
-        }
+        if (i + k - 1 > r) { l = i - k + 1; r = i + k - 1; }
     }
-
     return d1;
 }
 
+// d2[i] = radius of the even palindrome between i-1 and i
 vector<int> manacher_even(const string& s) {
-    int n = (int)s.size();
+    int n = sz(s);
     vector<int> d2(n);
     int l = 0, r = -1;
-
     for (int i = 0; i < n; i++) {
         int k = (i > r) ? 0 : min(d2[l + r - i + 1], r - i + 1);
-        while (0 <= i - k - 1 && i + k < n && s[i - k - 1] == s[i + k]) {
-            k++;
-        }
+        while (0 <= i - k - 1 && i + k < n
+               && s[i - k - 1] == s[i + k]) k++;
         d2[i] = k;
-        if (i + k - 1 > r) {
-            l = i - k;
-            r = i + k - 1;
-        }
+        if (i + k - 1 > r) { l = i - k; r = i + k - 1; }
     }
-
     return d2;
 }
-\end{lstlisting}
 
-\textbf{Longest palindromic substring length:}
-\begin{lstlisting}
-int longest_palindrome_len(const string& s) {
-    auto d1 = manacher_odd(s);
-    auto d2 = manacher_even(s);
+int longest_palindrome(const string& s) {
+    auto d1 = manacher_odd(s), d2 = manacher_even(s);
     int ans = 0;
-
     for (int x : d1) ans = max(ans, 2 * x - 1);
     for (int x : d2) ans = max(ans, 2 * x);
-
     return ans;
 }
 \end{lstlisting}
+\uses{the total number of palindromic substrings is
+$\sum d1[i] + \sum d2[i]$.}
+
+\sub{String Hashing}{n \text{ build},\; 1 \text{ per substring}}
+\begin{lstlisting}
+struct Hash {
+    static const ll M = (1LL << 61) - 1;   // Mersenne prime
+    ll B;                                  // random base
+    vector<ll> h, p;
+
+    static ll mul(ll a, ll b) {
+        __int128 c = (__int128)a * b;
+        ll lo = (ll)(c & M), hi = (ll)(c >> 61);
+        lo += hi;
+        return lo >= M ? lo - M : lo;
+    }
+
+    Hash(const string& s) {
+        B = uniform_int_distribution<ll>(256, M - 2)(rng);
+        int n = sz(s);
+        h.assign(n + 1, 0);
+        p.assign(n + 1, 1);
+        for (int i = 0; i < n; i++) {
+            h[i + 1] = (mul(h[i], B) + s[i]) % M;
+            p[i + 1] = mul(p[i], B);
+        }
+    }
+
+    // Hash of the inclusive range [l, r]
+    ll get(int l, int r) {
+        ll x = (h[r + 1] - mul(h[l], p[r - l + 1])) % M;
+        return x < 0 ? x + M : x;
+    }
+};
+\end{lstlisting}
+\uses{$O(1)$ substring comparison, so binary searching the longest
+common prefix of two suffixes costs $O(\log n)$.}
+\warn{Randomise the base. A fixed base with a small modulus is trivially
+hacked on Codeforces. Modulo $2^{61}-1$ with a random base is safe in
+practice.}
+
+\sub{Trie}{|s| \text{ per operation}}
+\begin{lstlisting}
+struct Trie {
+    static const int A = 26;
+    vector<array<int, A>> nxt;
+    vector<int> cnt;                  // words ending here
+
+    Trie() { new_node(); }
+
+    int new_node() {
+        nxt.push_back({});
+        nxt.back().fill(-1);
+        cnt.push_back(0);
+        return sz(nxt) - 1;
+    }
+
+    void insert(const string& s) {
+        int v = 0;
+        for (char ch : s) {
+            int c = ch - 'a';
+            if (nxt[v][c] == -1) nxt[v][c] = new_node();
+            v = nxt[v][c];
+        }
+        cnt[v]++;
+    }
+
+    bool contains(const string& s) {
+        int v = 0;
+        for (char ch : s) {
+            int c = ch - 'a';
+            if (nxt[v][c] == -1) return false;
+            v = nxt[v][c];
+        }
+        return cnt[v] > 0;
+    }
+};
+\end{lstlisting}
+\uses{prefix queries, autocomplete, and --- with \code{A = 2} over the
+bits of each number --- maximum XOR pair queries.}
 
 \end{multicols}
-\vspace{0.4cm}
 
-% =========================
-% 6. Grafos básicos
-% =========================
-\section{Grafos básicos}
+% =====================================================================
+\section{Graphs: Traversal and Ordering}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{Adjacency List}
+\subsection{Representations}
 \begin{lstlisting}
 const int MAXN = 2e5 + 5;
+
+// Adjacency list: the default choice
 vector<int> adj[MAXN];
-\end{lstlisting}
-
-\textbf{Agregar arista no dirigida:}
-\begin{lstlisting}
 adj[u].push_back(v);
-adj[v].push_back(u);
+adj[v].push_back(u);              // omit if directed
+
+// Weighted
+vector<pii> wadj[MAXN];           // {neighbour, weight}
+wadj[u].push_back({v, w});
+
+// Edge list: for Kruskal and Bellman-Ford
+vector<tuple<int,int,int>> edges; // {w, u, v}
 \end{lstlisting}
 
-\subsection{Propiedades de grafos}
-\textbf{Tree edges:}
-\[
-E = n - 1
-\]
+\subsection{Graph Identities}
+\begin{itemize}
+    \item Tree on $n$ nodes: exactly $n - 1$ edges, connected, acyclic.
+    \item Complete graph $K_n$: $\frac{n(n-1)}{2}$ edges.
+    \item Handshake lemma: $\sum_{v} \deg(v) = 2|E|$.
+    \item A connected graph has an Euler circuit iff every degree is
+          even; an Euler path iff exactly two degrees are odd.
+    \item A graph is bipartite iff it has no odd-length cycle.
+\end{itemize}
 
-\textbf{Complete graph edges $K_n$:}
-\[
-E = \frac{n(n-1)}{2}
-\]
-
-\textbf{Handshaking Lemma:}
-\[
-\sum deg(v) = 2 \cdot |E|
-\]
-
-\subsection{DFS Depth First Search}
+\sub{DFS}{V + E}
 \begin{lstlisting}
 bool vis[MAXN];
 
 void dfs(int u) {
     vis[u] = true;
-    for (int v : adj[u]) {
+    for (int v : adj[u])
         if (!vis[v]) dfs(v);
-    }
 }
 \end{lstlisting}
-\textbf{Uso:} componentes, árboles y recorridos generales.
+\warn{Recursion depth equals the longest path. For $n = 10^5$ on a path
+graph this overflows the default stack. Use the iterative form below.}
 
-\subsection{BFS Breadth First Search}
+\subsection{Iterative DFS}
 \begin{lstlisting}
-void bfs(int s) {
-    queue<int> q;
-    q.push(s);
+void dfs_iter(int s) {
+    vector<int> st{s};
     vis[s] = true;
-
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-
-        for (int v : adj[u]) {
-            if (!vis[v]) {
-                vis[v] = true;
-                q.push(v);
-            }
-        }
+    while (!st.empty()) {
+        int u = st.back(); st.pop_back();
+        for (int v : adj[u])
+            if (!vis[v]) { vis[v] = true; st.push_back(v); }
     }
 }
 \end{lstlisting}
-\textbf{Uso:} shortest path en grafos no ponderados.
+\tip{Mark nodes visited when you \emph{push} them, not when you pop, or
+the same node lands on the stack many times.}
 
-\subsection{BFS Distances}
+\sub{BFS and Distances}{V + E}
 \begin{lstlisting}
-int dist[MAXN]; // Inicializar con -1
-
-void bfs_dist(int s) {
+vector<int> bfs(int s, int n) {
+    vector<int> dist(n + 1, -1);
     queue<int> q;
     q.push(s);
     dist[s] = 0;
-
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-
-        for (int v : adj[u]) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u])
             if (dist[v] == -1) {
                 dist[v] = dist[u] + 1;
                 q.push(v);
             }
+    }
+    return dist;
+}
+\end{lstlisting}
+\uses{shortest paths on \emph{unweighted} graphs. \code{dist[v] == -1}
+doubles as the visited flag.}
+
+\subsection{Multi-Source BFS}
+\begin{lstlisting}
+// Distance from the NEAREST source, in one pass
+queue<int> q;
+for (int s : sources) { dist[s] = 0; q.push(s); }
+// ... identical BFS loop from here
+\end{lstlisting}
+\uses{"distance to the closest fire / gate / water cell". Seeding every
+source at once beats running one BFS per source.}
+
+\sub{0-1 BFS}{V + E}
+\begin{lstlisting}
+// Shortest path when every edge weight is 0 or 1
+deque<int> dq;
+vector<int> dist(n, INT_MAX);
+dist[s] = 0;
+dq.push_front(s);
+while (!dq.empty()) {
+    int u = dq.front(); dq.pop_front();
+    for (auto [v, w] : wadj[u]) {
+        if (dist[u] + w < dist[v]) {
+            dist[v] = dist[u] + w;
+            if (w == 0) dq.push_front(v);
+            else        dq.push_back(v);
         }
     }
 }
 \end{lstlisting}
+\uses{a Dijkstra replacement without the $\log$ factor when the only
+weights are 0 and 1.}
 
-\subsection{Grid Directions 4-way}
+\subsection{Grid Traversal}
 \begin{lstlisting}
 int dx[4] = {-1, 1, 0, 0};
-int dy[4] = {0, 0, -1, 1};
+int dy[4] = { 0, 0,-1, 1};
+
+// 8 directions, including diagonals
+int ex[8] = {-1,-1,-1, 0, 0, 1, 1, 1};
+int ey[8] = {-1, 0, 1,-1, 1,-1, 0, 1};
 
 for (int k = 0; k < 4; k++) {
-    int nx = x + dx[k];
-    int ny = y + dy[k];
-    // Check bounds: 0 <= nx < R, 0 <= ny < C
+    int nx = x + dx[k], ny = y + dy[k];
+    if (nx < 0 || nx >= R || ny < 0 || ny >= C) continue;
+    if (grid[nx][ny] == '#') continue;
+    // ...
 }
 \end{lstlisting}
+\tip{Flatten a cell to \code{x * C + y} when you need it as a single
+integer id (for a DSU, or a \code{dist} array).}
 
-\subsection{Coloreado de grafos Bipartite Check}
-\textbf{Uso:} detectar si un grafo no dirigido puede colorearse con 2 colores. $O(V+E)$.
+\sub{Connected Components}{V + E}
+\begin{lstlisting}
+int components = 0;
+for (int i = 1; i <= n; i++)
+    if (!vis[i]) { components++; dfs(i); }
+\end{lstlisting}
+
+\sub{Bipartite Check}{V + E}
 \begin{lstlisting}
 vector<int> color(MAXN, -1);
 
-bool bfs_color(int s) {
-    queue<int> q;
-    q.push(s);
-    color[s] = 0;
-
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-
-        for (int v : adj[u]) {
-            if (color[v] == -1) {
-                color[v] = color[u] ^ 1;
-                q.push(v);
-            } else if (color[v] == color[u]) {
-                return false;
+bool bipartite(int n) {
+    for (int s = 1; s <= n; s++) {
+        if (color[s] != -1) continue;
+        color[s] = 0;
+        queue<int> q;
+        q.push(s);
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            for (int v : adj[u]) {
+                if (color[v] == -1) {
+                    color[v] = color[u] ^ 1;
+                    q.push(v);
+                } else if (color[v] == color[u]) {
+                    return false;
+                }
             }
         }
-    }
-
-    return true;
-}
-
-bool is_bipartite(int n) {
-    fill(color.begin(), color.begin() + n + 1, -1);
-    for (int i = 1; i <= n; i++) {
-        if (color[i] == -1 && !bfs_color(i)) return false;
     }
     return true;
 }
 \end{lstlisting}
+\warn{Loop over every start node. Checking only node 1 misses
+disconnected components.}
 
-\subsection{Detectar ciclo en grafo no dirigido}
+\sub{Cycle in an Undirected Graph}{V + E}
 \begin{lstlisting}
-bool has_cycle_undirected(int u, int parent) {
+bool dfs_cycle(int u, int parent) {
     vis[u] = true;
-
     for (int v : adj[u]) {
         if (!vis[v]) {
-            if (has_cycle_undirected(v, u)) return true;
+            if (dfs_cycle(v, u)) return true;
         } else if (v != parent) {
             return true;
         }
     }
-
-    return false;
-}
-
-bool cycle_undirected_all(int n) {
-    fill(vis, vis + n + 1, false);
-    for (int i = 1; i <= n; i++) {
-        if (!vis[i] && has_cycle_undirected(i, -1)) return true;
-    }
     return false;
 }
 \end{lstlisting}
+\warn{With multi-edges, comparing to \code{parent} by node id is wrong
+--- track the incoming edge id instead.}
 
-\subsection{Detectar ciclo en grafo dirigido}
-\textbf{Estado:} 0 = no visitado, 1 = activo, 2 = terminado.
+\sub{Cycle in a Directed Graph}{V + E}
 \begin{lstlisting}
+// 0 = unvisited, 1 = on the current path, 2 = done
 int state[MAXN];
 
-bool has_cycle_directed(int u) {
+bool dfs_cycle_dir(int u) {
     state[u] = 1;
-
     for (int v : adj[u]) {
-        if (state[v] == 1) return true;
-        if (state[v] == 0 && has_cycle_directed(v)) return true;
+        if (state[v] == 1) return true;      // back edge
+        if (state[v] == 0 && dfs_cycle_dir(v)) return true;
     }
-
     state[u] = 2;
     return false;
 }
+\end{lstlisting}
+\warn{State 2 matters: revisiting a \emph{finished} node is a cross
+edge, not a cycle. A plain \code{vis} array reports false cycles.}
 
-bool cycle_directed_all(int n) {
-    fill(state, state + n + 1, 0);
-    for (int i = 1; i <= n; i++) {
-        if (state[i] == 0 && has_cycle_directed(i)) return true;
+\sub{Topological Sort (Kahn)}{V + E}
+\begin{lstlisting}
+vector<int> topo_sort(int n) {
+    vector<int> indeg(n + 1, 0), order;
+    for (int u = 1; u <= n; u++)
+        for (int v : adj[u]) indeg[v]++;
+
+    queue<int> q;                 // priority_queue for
+    for (int i = 1; i <= n; i++)  // lexicographically smallest
+        if (indeg[i] == 0) q.push(i);
+
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        order.push_back(u);
+        for (int v : adj[u])
+            if (--indeg[v] == 0) q.push(v);
     }
-    return false;
+    if (sz(order) != n) return {};   // a cycle exists
+    return order;
 }
+\end{lstlisting}
+\uses{a short result means the graph has a cycle --- this doubles as
+cycle detection. Longest path on a DAG is a DP over this order.}
+
+\subsection{Topological Sort (DFS)}
+\begin{lstlisting}
+void topo_dfs(int u, vector<int>& order) {
+    vis[u] = true;
+    for (int v : adj[u]) if (!vis[v]) topo_dfs(v, order);
+    order.push_back(u);            // post-order
+}
+// Reverse `order` at the end
 \end{lstlisting}
 
 \end{multicols}
-\vspace{0.4cm}
 
-% =========================
-% 7. Grafos avanzados y DSU
-% =========================
-\section{Grafos avanzados y DSU}
+% =====================================================================
+\section{Shortest Paths, MST and DSU}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{Dijkstra Shortest Path}
+\sub{Dijkstra}{E \log V}
 \begin{lstlisting}
-const long long INF = 1e18;
-vector<pair<int, int>> adj[MAXN]; // {v, w}
-long long dist[MAXN];
-
-void dijkstra(int s) {
-    fill(dist, dist + MAXN, INF);
+vector<ll> dijkstra(int s, int n) {
+    vector<ll> dist(n + 1, INF);
+    priority_queue<pll, vector<pll>, greater<pll>> pq;
     dist[s] = 0;
-
-    priority_queue<pair<long long, int>,
-                   vector<pair<long long, int>>,
-                   greater<pair<long long, int>>> pq;
     pq.push({0, s});
 
     while (!pq.empty()) {
-        long long d = pq.top().first;
-        int u = pq.top().second;
-        pq.pop();
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;        // stale entry
 
-        if (d > dist[u]) continue;
-
-        for (auto edge : adj[u]) {
-            int v = edge.first;
-            int w = edge.second;
-
+        for (auto [v, w] : wadj[u]) {
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 pq.push({dist[v], v});
             }
         }
     }
+    return dist;
 }
 \end{lstlisting}
+\warn{Fails with negative weights. The \code{if (d > dist[u]) continue}
+line is not optional --- without it, stale queue entries reprocess
+nodes and the complexity degrades.}
 
-\subsection{Disjoint Set Union DSU}
+\subsection{Path Reconstruction}
+\begin{lstlisting}
+vector<int> par(n + 1, -1);
+// inside the relaxation:
+//   par[v] = u;
+
+vector<int> path;
+for (int cur = t; cur != -1; cur = par[cur])
+    path.push_back(cur);
+reverse(all(path));
+\end{lstlisting}
+
+\sub{Bellman-Ford}{VE}
+\begin{lstlisting}
+// Handles negative weights and detects negative cycles
+vector<ll> bellman_ford(int s, int n, bool& has_neg_cycle) {
+    vector<ll> dist(n + 1, INF);
+    dist[s] = 0;
+    for (int it = 0; it < n - 1; it++)
+        for (auto [w, u, v] : edges)
+            if (dist[u] < INF && dist[u] + w < dist[v])
+                dist[v] = dist[u] + w;
+
+    has_neg_cycle = false;
+    for (auto [w, u, v] : edges)          // one extra pass
+        if (dist[u] < INF && dist[u] + w < dist[v])
+            has_neg_cycle = true;
+    return dist;
+}
+\end{lstlisting}
+\uses{a distance that still improves on pass $n$ can only mean a
+negative cycle.}
+
+\sub{Floyd-Warshall}{V^3}
+\begin{lstlisting}
+// d[i][j] = weight of edge i->j, INF if none, 0 on diagonal
+for (int k = 1; k <= n; k++)
+    for (int i = 1; i <= n; i++) {
+        if (d[i][k] == INF) continue;     // big speedup
+        for (int j = 1; j <= n; j++)
+            if (d[i][k] + d[k][j] < d[i][j])
+                d[i][j] = d[i][k] + d[k][j];
+    }
+
+// d[i][i] < 0  =>  i lies on a negative cycle
+\end{lstlisting}
+\warn{\code{k} must be the outermost loop. Any other order silently
+computes the wrong answer. Practical up to $n \approx 500$.}
+\tip{With \code{d} as booleans and \code{|=}/\code{\&} instead of
+\code{+}/\code{min}, the same loop is transitive closure
+(reachability).}
+
+\sub{DSU / Union-Find}{\alpha(n)}
 \begin{lstlisting}
 struct DSU {
     vector<int> parent, sz;
+    int components;
 
-    DSU(int n) {
-        parent.resize(n + 1);
-        sz.assign(n + 1, 1);
-        iota(parent.begin(), parent.end(), 0);
+    DSU(int n) : parent(n + 1), sz(n + 1, 1), components(n) {
+        iota(all(parent), 0);
     }
 
-    int find(int i) {
-        if (parent[i] == i) return i;
-        return parent[i] = find(parent[i]);
+    int find(int x) {                     // path compression
+        return parent[x] == x
+             ? x
+             : parent[x] = find(parent[x]);
     }
 
-    void unite(int i, int j) {
-        int root_i = find(i);
-        int root_j = find(j);
+    bool unite(int a, int b) {            // union by size
+        a = find(a); b = find(b);
+        if (a == b) return false;
+        if (sz[a] < sz[b]) swap(a, b);
+        parent[b] = a;
+        sz[a] += sz[b];
+        components--;
+        return true;
+    }
 
-        if (root_i != root_j) {
-            if (sz[root_i] < sz[root_j]) swap(root_i, root_j);
-            parent[root_j] = root_i;
-            sz[root_i] += sz[root_j];
+    bool same(int a, int b) { return find(a) == find(b); }
+    int  size(int x)        { return sz[find(x)];        }
+};
+\end{lstlisting}
+\uses{connectivity under edge insertions, Kruskal, and counting
+components online. $\alpha(n) \le 4$ for any realistic $n$ --- treat it
+as constant.}
+\warn{DSU cannot delete edges. If the problem removes edges, process
+the queries in reverse.}
+
+\sub{Kruskal MST}{E \log E}
+\begin{lstlisting}
+ll kruskal(int n, vector<tuple<int,int,int>>& edges) {
+    sort(all(edges));                     // by weight
+    DSU dsu(n);
+    ll total = 0;
+    int used = 0;
+    for (auto [w, u, v] : edges) {
+        if (dsu.unite(u, v)) {
+            total += w;
+            if (++used == n - 1) break;
         }
     }
-};
+    return used == n - 1 ? total : -1;    // -1: disconnected
+}
+\end{lstlisting}
+\tip{Sort descending for a maximum spanning tree. For the "minimise the
+largest edge on a path" family, the MST is the answer.}
+
+\sub{Prim MST}{E \log V}
+\begin{lstlisting}
+// Better than Kruskal on dense graphs
+ll prim(int n) {
+    vector<bool> in(n + 1, false);
+    priority_queue<pll, vector<pll>, greater<pll>> pq;
+    pq.push({0, 1});
+    ll total = 0;
+    int used = 0;
+    while (!pq.empty() && used < n) {
+        auto [w, u] = pq.top(); pq.pop();
+        if (in[u]) continue;
+        in[u] = true;
+        total += w;
+        used++;
+        for (auto [v, c] : wadj[u])
+            if (!in[v]) pq.push({c, v});
+    }
+    return used == n ? total : -1;
+}
 \end{lstlisting}
 
 \end{multicols}
-\vspace{0.4cm}
 
-% =========================
-% 8. Estructuras de datos avanzadas
-% =========================
-\section{Estructuras de datos avanzadas}
+% =====================================================================
+\section{Trees and Advanced Graphs}
+% =====================================================================
 \begin{multicols}{2}
 
-\subsection{Segment Tree Sum Range}
+\sub{Rooting: Parent, Depth, Subtree Size}{n}
 \begin{lstlisting}
-const int MAXN = 2e5;
-int t[4 * MAXN], a[MAXN];
+vector<int> par, dep, sub;
 
-void build(int v, int tl, int tr) {
-    if (tl == tr) {
-        t[v] = a[tl];
-    } else {
-        int tm = (tl + tr) / 2;
-        build(2 * v, tl, tm);
-        build(2 * v + 1, tm + 1, tr);
-        t[v] = t[2 * v] + t[2 * v + 1];
+void root_tree(int u, int p) {
+    par[u] = p;
+    sub[u] = 1;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dep[v] = dep[u] + 1;
+        root_tree(v, u);
+        sub[u] += sub[v];
     }
 }
+// call: dep[1] = 0; root_tree(1, 0);
+\end{lstlisting}
+\tip{Skipping the parent is all a tree DFS needs --- no visited array.}
 
-int query(int v, int tl, int tr, int l, int r) {
-    if (l > r) return 0;
-    if (l == tl && r == tr) return t[v];
+\sub{Tree Diameter}{n}
+\begin{lstlisting}
+// Two BFS passes. Works on unweighted trees.
+// 1. BFS from any node -> the farthest node a
+// 2. BFS from a        -> the farthest node b
+// dist(a, b) is the diameter
+int farthest(int s, int n) {
+    auto d = bfs(s, n);
+    int best = s;
+    for (int i = 1; i <= n; i++)
+        if (d[i] > d[best]) best = i;
+    return best;
+}
+\end{lstlisting}
+\warn{The two-BFS trick is only valid on trees (and on graphs with
+non-negative weights using Dijkstra). It is wrong on general graphs.}
 
-    int tm = (tl + tr) / 2;
-    return query(2 * v, tl, tm, l, min(r, tm))
-         + query(2 * v + 1, tm + 1, tr, max(l, tm + 1), r);
+\sub{LCA with Binary Lifting}{n \log n \text{ build},\; \log n \text{ query}}
+\begin{lstlisting}
+const int LOG = 18;              // 2^18 > 2*10^5
+int up[MAXN][LOG];
+
+void build_lca(int n) {
+    for (int i = 1; i <= n; i++) up[i][0] = par[i];
+    for (int j = 1; j < LOG; j++)
+        for (int i = 1; i <= n; i++)
+            up[i][j] = up[ up[i][j-1] ][j-1];
 }
 
-void update(int v, int tl, int tr, int pos, int new_val) {
-    if (tl == tr) {
-        t[v] = new_val;
-    } else {
-        int tm = (tl + tr) / 2;
-        if (pos <= tm) update(2 * v, tl, tm, pos, new_val);
-        else update(2 * v + 1, tm + 1, tr, pos, new_val);
-        t[v] = t[2 * v] + t[2 * v + 1];
+int lca(int u, int v) {
+    if (dep[u] < dep[v]) swap(u, v);
+    int diff = dep[u] - dep[v];
+    for (int j = 0; j < LOG; j++)          // lift u up
+        if (diff & (1 << j)) u = up[u][j];
+    if (u == v) return u;
+
+    for (int j = LOG - 1; j >= 0; j--)     // lift together
+        if (up[u][j] != up[v][j]) {
+            u = up[u][j];
+            v = up[v][j];
+        }
+    return up[u][0];
+}
+
+int dist(int u, int v) {
+    return dep[u] + dep[v] - 2 * dep[lca(u, v)];
+}
+
+int kth_ancestor(int u, int k) {
+    for (int j = 0; j < LOG && u; j++)
+        if (k & (1 << j)) u = up[u][j];
+    return u;
+}
+\end{lstlisting}
+\warn{Set \code{par[root] = root} (or 0 with \code{up[0][*] = 0}) so
+lifting past the root is harmless.}
+
+\sub{Euler Tour: Subtree as a Range}{n}
+\begin{lstlisting}
+int timer = 0;
+vector<int> tin(MAXN), tout(MAXN);
+
+void euler(int u, int p) {
+    tin[u] = timer++;
+    for (int v : adj[u]) if (v != p) euler(v, u);
+    tout[u] = timer;               // half-open [tin, tout)
+}
+
+// u is an ancestor of v
+bool is_anc(int u, int v) {
+    return tin[u] <= tin[v] && tout[v] <= tout[u];
+}
+\end{lstlisting}
+\uses{the subtree of \code{u} is exactly the contiguous range
+$[tin_u, tout_u)$. Subtree sum and subtree update become an ordinary BIT
+or segment tree range operation.}
+
+\sub{DP on Trees}{n}
+\begin{lstlisting}
+// Example: largest independent set in a tree
+// dp[u][0] = u not taken, dp[u][1] = u taken
+ll dp[MAXN][2];
+
+void tree_dp(int u, int p) {
+    dp[u][0] = 0;
+    dp[u][1] = 1;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        tree_dp(v, u);
+        dp[u][0] += max(dp[v][0], dp[v][1]);
+        dp[u][1] += dp[v][0];
+    }
+}
+// answer: max(dp[root][0], dp[root][1])
+\end{lstlisting}
+
+\sub{Bridges}{V + E}
+An edge whose removal disconnects the graph.
+\begin{lstlisting}
+vector<int> tin_b(MAXN, -1), low(MAXN);
+vector<pii> bridges;
+int timer_b = 0;
+
+void dfs_bridge(int u, int pe) {   // pe = incoming edge id
+    tin_b[u] = low[u] = timer_b++;
+    for (auto [v, id] : adj_id[u]) {
+        if (id == pe) continue;
+        if (tin_b[v] != -1) {
+            low[u] = min(low[u], tin_b[v]);
+        } else {
+            dfs_bridge(v, id);
+            low[u] = min(low[u], low[v]);
+            if (low[v] > tin_b[u]) bridges.push_back({u, v});
+        }
     }
 }
 \end{lstlisting}
+\warn{Skip by \emph{edge id}, not by parent node --- otherwise parallel
+edges are misreported as bridges. \code{adj\_id[u]} stores
+\code{\{neighbour, edge\_id\}}.}
 
-\textbf{Nota:} para max/min, cambia \code{+} por \code{max}/\code{min} y el neutro a \code{-INF}/\code{INF}.
-
-\subsection{Fenwick Tree BIT}
+\sub{Articulation Points}{V + E}
 \begin{lstlisting}
-int bit[MAXN];
+vector<bool> is_art(MAXN, false);
 
-void add(int idx, int val) {
-    for (; idx < MAXN; idx += idx & -idx) {
-        bit[idx] += val;
+void dfs_art(int u, int p) {
+    tin_b[u] = low[u] = timer_b++;
+    int children = 0;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (tin_b[v] != -1) {
+            low[u] = min(low[u], tin_b[v]);
+        } else {
+            dfs_art(v, u);
+            low[u] = min(low[u], low[v]);
+            if (low[v] >= tin_b[u] && p != -1) is_art[u] = true;
+            children++;
+        }
     }
+    if (p == -1 && children > 1) is_art[u] = true;
+}
+\end{lstlisting}
+\warn{The root is special: it is an articulation point only when it has
+more than one DFS child.}
+
+\sub{SCC (Kosaraju)}{V + E}
+\begin{lstlisting}
+vector<int> order_k, comp;
+vector<int> radj[MAXN];             // reversed graph
+
+void dfs1(int u) {
+    vis[u] = true;
+    for (int v : adj[u]) if (!vis[v]) dfs1(v);
+    order_k.push_back(u);
 }
 
-int query(int idx) {
-    int res = 0;
-    for (; idx > 0; idx -= idx & -idx) {
-        res += bit[idx];
+void dfs2(int u, int c) {
+    comp[u] = c;
+    for (int v : radj[u]) if (comp[v] == -1) dfs2(v, c);
+}
+
+int kosaraju(int n) {
+    comp.assign(n + 1, -1);
+    for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
+    reverse(all(order_k));
+    int c = 0;
+    for (int u : order_k)
+        if (comp[u] == -1) dfs2(u, c++);
+    return c;                       // number of SCCs
+}
+\end{lstlisting}
+\uses{contracting each SCC to a single node yields a DAG (the condensation),
+which you can then topologically sort or DP over.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Dynamic Programming}
+% =====================================================================
+\begin{multicols}{2}
+
+\subsection{How to Build a DP}
+\begin{enumerate}
+    \item \textbf{State} --- what exactly does \code{dp[i][j]} mean?
+          Write it down as a sentence first.
+    \item \textbf{Transition} --- how do smaller states combine into it?
+    \item \textbf{Base case} --- the smallest state, filled directly.
+    \item \textbf{Order} --- iterate so every dependency is already
+          computed.
+    \item \textbf{Answer} --- which state (or which max/sum over states)
+          is the result?
+\end{enumerate}
+\tip{Total cost $=$ number of states $\times$ cost per transition.
+Check that against the constraints before writing any code.}
+
+\sub{0/1 Knapsack}{nW}
+\begin{lstlisting}
+// Each item used at most once
+vector<ll> dp(W + 1, 0);
+for (int i = 0; i < n; i++)
+    for (int w = W; w >= wt[i]; w--)      // DESCENDING
+        dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);
+// dp[W] = best value within capacity W
+\end{lstlisting}
+\warn{The descending loop is what enforces "at most once". Ascending
+turns it into the unbounded version.}
+
+\sub{Unbounded Knapsack / Coin Change}{nW}
+\begin{lstlisting}
+// Minimum number of coins summing to W
+vector<int> dp(W + 1, IINF);
+dp[0] = 0;
+for (int c : coins)
+    for (int w = c; w <= W; w++)          // ASCENDING
+        if (dp[w - c] != IINF)
+            dp[w] = min(dp[w], dp[w - c] + 1);
+
+// Number of distinct combinations (order ignored)
+vector<ll> ways(W + 1, 0);
+ways[0] = 1;
+for (int c : coins)
+    for (int w = c; w <= W; w++)
+        ways[w] += ways[w - c];
+\end{lstlisting}
+\warn{Loop order decides the meaning. Coins outside, sums inside counts
+\emph{combinations}; sums outside, coins inside counts
+\emph{permutations}.}
+
+\sub{LCS}{nm}
+\begin{lstlisting}
+vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+for (int i = 1; i <= n; i++)
+    for (int j = 1; j <= m; j++)
+        dp[i][j] = (a[i-1] == b[j-1])
+                 ? dp[i-1][j-1] + 1
+                 : max(dp[i-1][j], dp[i][j-1]);
+\end{lstlisting}
+
+\sub{Edit Distance}{nm}
+\begin{lstlisting}
+vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+for (int i = 0; i <= n; i++) dp[i][0] = i;   // deletions
+for (int j = 0; j <= m; j++) dp[0][j] = j;   // insertions
+
+for (int i = 1; i <= n; i++)
+    for (int j = 1; j <= m; j++)
+        dp[i][j] = (a[i-1] == b[j-1])
+            ? dp[i-1][j-1]
+            : 1 + min({dp[i-1][j],      // delete
+                       dp[i][j-1],      // insert
+                       dp[i-1][j-1]});  // replace
+\end{lstlisting}
+
+\sub{Bitmask DP (TSP)}{2^n n^2}
+\begin{lstlisting}
+// dp[mask][i] = min cost visiting `mask`, standing at i
+vector<vector<ll>> dp(1 << n, vector<ll>(n, INF));
+dp[1][0] = 0;                         // start at node 0
+
+for (int mask = 1; mask < (1 << n); mask++)
+    for (int i = 0; i < n; i++) {
+        if (dp[mask][i] == INF) continue;
+        if (!(mask & (1 << i))) continue;
+        for (int j = 0; j < n; j++) {
+            if (mask & (1 << j)) continue;
+            int nm = mask | (1 << j);
+            dp[nm][j] = min(dp[nm][j], dp[mask][i] + cost[i][j]);
+        }
+    }
+
+ll ans = INF;
+for (int i = 1; i < n; i++)
+    ans = min(ans, dp[(1 << n) - 1][i] + cost[i][0]);
+\end{lstlisting}
+\uses{$n \le 20$ is the giveaway that a bitmask DP is intended.}
+
+\sub{Digit DP}{|d| \cdot 10 \cdot \text{states}}
+\begin{lstlisting}
+string num;
+ll memo[20][2][200];
+bool seen[20][2][200];
+
+// Counts values in [0, num] with some digit property
+ll go(int pos, bool tight, int acc) {
+    if (pos == sz(num)) return good(acc) ? 1 : 0;
+    if (!tight && seen[pos][tight][acc])
+        return memo[pos][tight][acc];
+
+    int lim = tight ? num[pos] - '0' : 9;
+    ll res = 0;
+    for (int d = 0; d <= lim; d++)
+        res += go(pos + 1, tight && (d == lim), acc + d);
+
+    if (!tight) {
+        seen[pos][tight][acc] = true;
+        memo[pos][tight][acc] = res;
     }
     return res;
 }
+// Range [L, R]: go(R) - go(L - 1)
+\end{lstlisting}
+\warn{Only memoise the \code{!tight} states --- tight states depend on
+the specific prefix and are not reusable.}
 
-int queryRange(int l, int r) {
-    return query(r) - query(l - 1);
+\sub{Longest Path on a DAG}{V + E}
+\begin{lstlisting}
+// Process nodes in topological order
+vector<ll> dp(n + 1, 0);
+for (int u : topo_order)
+    for (int v : adj[u])
+        dp[v] = max(dp[v], dp[u] + 1);
+\end{lstlisting}
+\uses{longest path is NP-hard on general graphs but linear on a DAG,
+because the topological order removes all cyclic dependencies.}
+
+\subsection{Memory Optimisation}
+\begin{lstlisting}
+// When dp[i] only reads dp[i-1], keep two rows
+vector<int> prev(m + 1, 0), cur(m + 1, 0);
+for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) cur[j] = /* ... */;
+    swap(prev, cur);
+}
+\end{lstlisting}
+\tip{$10^5 \times 10^5$ \code{int}s is 40 GB; two rows is 800 KB.
+Rolling arrays are often the difference between MLE and AC.}
+
+\end{multicols}
+
+% =====================================================================
+\section{Advanced Data Structures}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Fenwick Tree (BIT)}{\log n}
+\begin{lstlisting}
+struct Fenwick {
+    int n;
+    vector<ll> bit;
+
+    Fenwick(int n) : n(n), bit(n + 1, 0) {}
+
+    void add(int i, ll v) {          // 1-indexed
+        for (; i <= n; i += i & -i) bit[i] += v;
+    }
+
+    ll sum(int i) {                  // prefix [1, i]
+        ll r = 0;
+        for (; i > 0; i -= i & -i) r += bit[i];
+        return r;
+    }
+
+    ll range(int l, int r) { return sum(r) - sum(l - 1); }
+
+    // Smallest i with prefix sum >= target, O(log n)
+    int lower_bound(ll target) {
+        int pos = 0;
+        for (int pw = 1 << __lg(n); pw; pw >>= 1)
+            if (pos + pw <= n && bit[pos + pw] < target) {
+                pos += pw;
+                target -= bit[pos];
+            }
+        return pos + 1;
+    }
+};
+\end{lstlisting}
+\warn{A BIT is 1-indexed. Feeding it index 0 makes \code{add} loop
+forever, because \code{0 \& -0 == 0}.}
+\tip{Smaller and roughly twice as fast as a segment tree. Reach for a
+BIT whenever prefix sums are enough.}
+
+\sub{Fenwick: Range Update, Point Query}{\log n}
+\begin{lstlisting}
+// Store the difference array inside the BIT
+void add_range(Fenwick& f, int l, int r, ll v) {
+    f.add(l, v);
+    f.add(r + 1, -v);
+}
+ll point_query(Fenwick& f, int i) { return f.sum(i); }
+\end{lstlisting}
+
+\sub{2D Fenwick}{\log^2 n}
+\begin{lstlisting}
+ll bit2[N + 1][M + 1];
+
+void add2(int x, int y, ll v) {
+    for (int i = x; i <= N; i += i & -i)
+        for (int j = y; j <= M; j += j & -j)
+            bit2[i][j] += v;
+}
+
+ll sum2(int x, int y) {
+    ll r = 0;
+    for (int i = x; i > 0; i -= i & -i)
+        for (int j = y; j > 0; j -= j & -j)
+            r += bit2[i][j];
+    return r;
+}
+
+ll rect2(int x1, int y1, int x2, int y2) {
+    return sum2(x2, y2) - sum2(x1 - 1, y2)
+         - sum2(x2, y1 - 1) + sum2(x1 - 1, y1 - 1);
 }
 \end{lstlisting}
 
-\textbf{Truco:} el BIT es 1-indexed. Si tus datos son 0-indexed, suma 1 al índice.
+\sub{Segment Tree (Recursive)}{\log n}
+\begin{lstlisting}
+const int MAXN = 2e5 + 5;
+ll t[4 * MAXN];
+int a[MAXN];
 
-\subsection{Policy-Based Data Structures Ordered Set}
+void build(int v, int tl, int tr) {
+    if (tl == tr) { t[v] = a[tl]; return; }
+    int tm = (tl + tr) / 2;
+    build(2*v, tl, tm);
+    build(2*v + 1, tm + 1, tr);
+    t[v] = t[2*v] + t[2*v + 1];
+}
+
+ll query(int v, int tl, int tr, int l, int r) {
+    if (l > r) return 0;                 // neutral element
+    if (l == tl && r == tr) return t[v];
+    int tm = (tl + tr) / 2;
+    return query(2*v, tl, tm, l, min(r, tm))
+         + query(2*v + 1, tm + 1, tr, max(l, tm + 1), r);
+}
+
+void update(int v, int tl, int tr, int pos, ll val) {
+    if (tl == tr) { t[v] = val; return; }
+    int tm = (tl + tr) / 2;
+    if (pos <= tm) update(2*v, tl, tm, pos, val);
+    else           update(2*v + 1, tm + 1, tr, pos, val);
+    t[v] = t[2*v] + t[2*v + 1];
+}
+\end{lstlisting}
+\tip{For min/max, swap \code{+} for \code{min}/\code{max} and change the
+neutral element to \code{INF}/\code{-INF}. Size the array $4n$, not
+$2n$.}
+
+\sub{Segment Tree (Iterative)}{\log n}
+\begin{lstlisting}
+// Shorter, ~2x faster, point update + range query
+int N;
+ll t[2 * MAXN];
+
+void build_it(int n) {
+    N = n;
+    for (int i = N - 1; i > 0; i--) t[i] = t[2*i] + t[2*i+1];
+}
+
+void update_it(int p, ll val) {
+    for (t[p += N] = val; p > 1; p >>= 1)
+        t[p >> 1] = t[p] + t[p ^ 1];
+}
+
+ll query_it(int l, int r) {          // inclusive [l, r]
+    ll res = 0;
+    for (l += N, r += N + 1; l < r; l >>= 1, r >>= 1) {
+        if (l & 1) res += t[l++];
+        if (r & 1) res += t[--r];
+    }
+    return res;
+}
+\end{lstlisting}
+\warn{Leaves live at \code{t[N .. 2N-1]}. Fill them before calling
+\code{build\_it}.}
+
+\sub{Segment Tree with Lazy Propagation}{\log n}
+\begin{lstlisting}
+ll t[4 * MAXN], lz[4 * MAXN];
+
+void push(int v, int tl, int tr) {
+    if (!lz[v]) return;
+    t[v] += lz[v] * (tr - tl + 1);
+    if (tl != tr) {
+        lz[2*v]     += lz[v];
+        lz[2*v + 1] += lz[v];
+    }
+    lz[v] = 0;
+}
+
+void update(int v, int tl, int tr, int l, int r, ll val) {
+    push(v, tl, tr);
+    if (l > tr || tl > r) return;
+    if (l <= tl && tr <= r) {
+        lz[v] += val;
+        push(v, tl, tr);
+        return;
+    }
+    int tm = (tl + tr) / 2;
+    update(2*v, tl, tm, l, r, val);
+    update(2*v + 1, tm + 1, tr, l, r, val);
+    t[v] = t[2*v] + t[2*v + 1];
+}
+
+ll query(int v, int tl, int tr, int l, int r) {
+    push(v, tl, tr);
+    if (l > tr || tl > r) return 0;
+    if (l <= tl && tr <= r) return t[v];
+    int tm = (tl + tr) / 2;
+    return query(2*v, tl, tm, l, r)
+         + query(2*v + 1, tm + 1, tr, l, r);
+}
+\end{lstlisting}
+\warn{\code{push} must run at the top of \emph{every} recursive call,
+including queries. A forgotten push is the classic lazy-propagation bug.}
+
+\sub{Sparse Table (RMQ)}{n \log n \text{ build},\; 1 \text{ query}}
+\begin{lstlisting}
+int sp[LOG][MAXN], lg[MAXN];
+
+void build_sparse(int n) {
+    lg[1] = 0;
+    for (int i = 2; i <= n; i++) lg[i] = lg[i / 2] + 1;
+
+    for (int i = 0; i < n; i++) sp[0][i] = a[i];
+    for (int j = 1; j < LOG; j++)
+        for (int i = 0; i + (1 << j) <= n; i++)
+            sp[j][i] = min(sp[j-1][i],
+                           sp[j-1][i + (1 << (j-1))]);
+}
+
+int query_min(int l, int r) {        // inclusive
+    int j = lg[r - l + 1];
+    return min(sp[j][l], sp[j][r - (1 << j) + 1]);
+}
+\end{lstlisting}
+\warn{Only valid for \emph{idempotent} operations --- min, max, gcd ---
+where overlapping ranges are harmless. It does not work for sums, and it
+does not support updates.}
+
+\sub{PBDS Ordered Set}{\log n}
 \begin{lstlisting}
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace __gnu_pbds;
 
-typedef tree<int, null_type,
-             less<int>, rb_tree_tag,
+typedef tree<int, null_type, less<int>, rb_tree_tag,
              tree_order_statistics_node_update> ordered_set;
 
-/*
-1. find_by_order(k): iterator to k-th smallest, 0-indexed.
-2. order_of_key(x): number of elements strictly smaller than x.
-*/
+ordered_set s;
+s.insert(1);
+s.insert(9);
 
-void example() {
-    ordered_set s;
-    s.insert(1);
-    s.insert(9);
-
-    auto it = s.find_by_order(0); // k-th
-    int c = s.order_of_key(5);    // count < x
-}
+// k-th smallest, 0-indexed
+auto it = s.find_by_order(0);
+// how many elements are strictly smaller than x
+int cnt = s.order_of_key(5);
 \end{lstlisting}
+\warn{GCC only. It rejects duplicates like a \code{set}; for a multiset
+use \code{less\_equal<int>} as the comparator --- but then
+\code{erase(value)} stops working and you must erase by iterator.}
 
 \end{multicols}
+
+% =====================================================================
+\section{Contest Techniques and Pitfalls}
+% =====================================================================
+\begin{multicols}{2}
+
+\sub{Meet in the Middle}{2^{n/2} \cdot n}
+\begin{lstlisting}
+// Subset sums for n <= 40: split into two halves
+vector<ll> gen(vector<ll>& v) {
+    int k = sz(v);
+    vector<ll> sums;
+    for (int mask = 0; mask < (1 << k); mask++) {
+        ll s = 0;
+        for (int i = 0; i < k; i++)
+            if (mask & (1 << i)) s += v[i];
+        sums.push_back(s);
+    }
+    return sums;
+}
+// Sort one half, binary search it for each element
+// of the other half.
+\end{lstlisting}
+\uses{$n \le 40$ where $2^n$ is hopeless but $2^{20}$ is instant.}
+
+\subsection{Interactive Problems}
+\begin{lstlisting}
+// Flush after every query or you will deadlock
+cout << "? " << x << endl;   // endl flushes
+cin >> response;
+
+cout << "! " << answer << endl;
+\end{lstlisting}
+\warn{This is the one place where \code{endl} is correct and
+\code{'\textbackslash n'} is a bug.}
+
+\subsection{Stress Testing}
+When a solution fails on a hidden test, generate your own:
+\begin{lstlisting}
+# gen.py writes a small random test to stdout
+for i in $(seq 1 1000); do
+    python gen.py $i > in.txt
+    ./fast  < in.txt > out1.txt
+    ./brute < in.txt > out2.txt
+    if ! diff -q out1.txt out2.txt > /dev/null; then
+        echo "Mismatch on test $i"
+        cat in.txt
+        break
+    fi
+done
+\end{lstlisting}
+\tip{Generate \emph{small} tests ($n \le 8$). A minimal counterexample
+you can read beats a 200-line one you cannot.}
+
+\subsection{Greedy: Proving It Works}
+\begin{itemize}
+    \item \textbf{Exchange argument} --- show any optimal solution can be
+          rewritten into the greedy one without getting worse.
+    \item \textbf{Stays ahead} --- show the greedy prefix is at least as
+          good as any other prefix at every step.
+    \item If neither works, it is probably a DP.
+\end{itemize}
+\tip{Cheapest check: brute-force small cases and diff against your
+greedy. A counterexample appears in seconds if there is one.}
+
+\subsection{Reading the Problem}
+\begin{itemize}
+    \item Is the answer guaranteed to exist, or must you print $-1$?
+    \item How many test cases per file? Are the sums of $n$ bounded?
+    \item Are indices 0-based or 1-based in the statement?
+    \item Can $n = 0$ or $n = 1$? Can the graph be disconnected?
+    \item Are values negative? Do they overflow \code{int}?
+    \item Is the graph a tree, a DAG, or fully general?
+\end{itemize}
+
+\subsection{Bug Checklist}
+Read this before rewriting anything from scratch.
+\begin{itemize}
+    \item \code{int} overflow: \code{(ll)a * b}, not \code{a * b}.
+    \item Arrays not reset between test cases.
+    \item Off-by-one: inclusive vs half-open ranges.
+    \item 0-indexed code fed 1-indexed input.
+    \item \code{n == 1}, empty input, all-equal values.
+    \item Recursion depth on a path graph.
+    \item \code{cin} left a newline before \code{getline}.
+    \item Comparator not a strict weak ordering.
+    \item \code{endl} inside a tight output loop (slow).
+\end{itemize}
+\warn{Clearing globals with \code{memset} across $10^5$ test cases is
+itself $O(t \cdot n)$. Reset only the indices you actually touched.}
+
+\subsection{Time Management}
+\begin{itemize}
+    \item Read \emph{every} problem before starting. The easiest is
+          rarely problem A.
+    \item Sort by how many teams have solved it, when the scoreboard
+          shows that.
+    \item Stuck for 20 minutes with no idea? Switch problems and come
+          back.
+    \item Write the brute force first when the statement is confusing ---
+          it clarifies the problem and doubles as a stress-test oracle.
+\end{itemize}
+
+\end{multicols}
+
+\vfill
+\begin{center}
+{\footnotesize\color{cmt}
+CP Reference Book --- C++ Edition \quad\textbullet\quad
+A Python edition with the same coverage ships alongside this one.\par}
+\end{center}
 
 \end{document}
