@@ -1,0 +1,55 @@
+name: Build PDFs
+
+# Only runs when the LaTeX sources change, so the PDF commit this workflow
+# makes at the end cannot re-trigger it.
+on:
+  push:
+    paths:
+      - "**/*.tex"
+      - ".github/workflows/build-pdf.yml"
+  pull_request:
+    paths:
+      - "**/*.tex"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Two passes each: the first builds the .toc, the second renders it.
+      - name: Compile C++ edition
+        working-directory: cpp
+        run: |
+          pdflatex -interaction=nonstopmode -halt-on-error cp-reference-cpp.tex
+          pdflatex -interaction=nonstopmode -halt-on-error cp-reference-cpp.tex
+
+      - name: Compile Python edition
+        working-directory: python
+        run: |
+          pdflatex -interaction=nonstopmode -halt-on-error cp-reference-python.tex
+          pdflatex -interaction=nonstopmode -halt-on-error cp-reference-python.tex
+
+      - name: Upload PDFs as build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cp-reference-pdfs
+          path: |
+            cpp/cp-reference-cpp.pdf
+            python/cp-reference-python.pdf
+
+      - name: Commit refreshed PDFs
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cpp/cp-reference-cpp.pdf python/cp-reference-python.pdf
+          git diff --staged --quiet || git commit -m "ci: rebuild reference PDFs"
+          git push

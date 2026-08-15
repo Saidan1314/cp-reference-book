@@ -1,0 +1,1187 @@
+\documentclass[10pt]{article}
+
+% =========================
+% Idioma y codificacion
+% =========================
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% =========================
+% Pagina: horizontal + margenes compactos
+% =========================
+\usepackage[landscape,margin=1cm]{geometry}
+\usepackage{multicol}
+\setlength{\columnsep}{0.8cm}
+\setlength{\columnseprule}{0.35pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+% =========================
+% Matematicas, color, tablas y links
+% =========================
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{listings}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!45!black,
+    urlcolor=blue!45!black
+}
+
+% =========================
+% Estilo de secciones
+% =========================
+\titleformat{\section}{\Large\bfseries\color{blue!45!black}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{8pt}{5pt}
+\titlespacing*{\subsection}{0pt}{5pt}{2pt}
+
+\setlist[itemize]{leftmargin=*, itemsep=1pt, topsep=2pt}
+
+% =========================
+% Configuracion de codigo
+% =========================
+\lstdefinestyle{cppstyle}{
+    language=C++,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\bfseries\color{blue!55!black},
+    commentstyle=\itshape\color{gray!70!black},
+    stringstyle=\color{green!35!black},
+    breaklines=true,
+    breakatwhitespace=false,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black!20},
+    framerule=0.3pt,
+    xleftmargin=1pt,
+    xrightmargin=1pt,
+    aboveskip=3pt,
+    belowskip=3pt,
+    literate=
+        {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+        {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+        {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+}
+\lstset{style=cppstyle}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+\pagenumbering{gobble}
+
+% =========================
+% Portada
+% =========================
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge\bfseries ICPC Reference Book\par}
+    \vspace{0.7cm}
+    {\Huge Arteaga Adán\par}
+
+    \vspace{1.5cm}
+    {\Huge Algorithms Sheet\par}
+    \vspace{0.4cm}
+    {\Large Competitive Programming Reference\\
+    	\vspace{2cm}
+    	\textbf{C++ version}\par}
+
+    \vfill
+
+    
+    \vfill
+    {\large GitHub-ready LaTeX Reference\par}
+\end{titlepage}
+
+% =========================
+% Indice dinamico
+% =========================
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+% =========================
+% 1. Base C++ y complejidad
+% =========================
+\section{Base C++ y complejidad}
+\begin{multicols}{2}
+
+\subsection{Fast I/O}
+\begin{lstlisting}
+ios::sync_with_stdio(false);
+cin.tie(nullptr);
+\end{lstlisting}
+
+\subsection{Precisión decimal}
+\begin{lstlisting}
+cout << fixed << setprecision(10) << ans << '\n';
+\end{lstlisting}
+
+\subsection{Límites de datos}
+\begin{itemize}
+    \item \code{int}: $\approx 2 \cdot 10^9$
+    \item \code{long long}: $\approx 9 \cdot 10^{18}$
+    \item \code{\_\_int128}: $\approx 10^{38}$, solo GCC.
+    \item \code{float}: 7 dígitos de precisión.
+    \item \code{double}: 15-17 dígitos de precisión.
+    \item \code{long double}: 18-19 dígitos de precisión.
+\end{itemize}
+
+\subsection{Truco de memoria}
+\begin{lstlisting}
+// 256 MB aprox:
+int a[64 * 1024 * 1024];
+\end{lstlisting}
+
+\subsection{Complejidades comunes}
+\begin{itemize}
+    \item $O(1)$: acceso a índice de arreglo.
+    \item $O(\log n)$: binary search, \code{std::set}.
+    \item $O(\sqrt n)$: primalidad, divisores.
+    \item $O(n)$: un recorrido lineal.
+    \item $O(n \log n)$: sorting, heap.
+    \item $O(n^2)$: doble loop, algunas DP.
+    \item $O(2^n)$: subconjuntos, bitmasking.
+    \item $O(n!)$: permutaciones.
+\end{itemize}
+
+\subsection{Restricciones estándar}
+\begin{itemize}
+    \item $10^8$ operaciones por segundo, aproximado.
+    \item $n = 10^5 \rightarrow O(n \log n)$ u $O(n)$.
+    \item $n = 500 \rightarrow O(n^3)$.
+    \item $n = 20 \rightarrow O(2^n \cdot n)$.
+\end{itemize}
+
+\subsection{Complejidad STL}
+\textbf{vector}
+\begin{itemize}
+    \item \code{push\_back()}, \code{pop\_back()}, \code{[]} $\rightarrow O(1)$.
+    \item \code{erase(iterator)} $\rightarrow O(n)$.
+\end{itemize}
+
+\textbf{set / map / multiset}
+\begin{itemize}
+    \item \code{insert()}, \code{erase()}, \code{find()} $\rightarrow O(\log n)$.
+\end{itemize}
+
+\textbf{unordered\_map / unordered\_set}
+\begin{itemize}
+    \item \code{insert()}, \code{find()} $\rightarrow$ promedio $O(1)$, peor caso $O(n)$.
+\end{itemize}
+
+\textbf{priority\_queue}
+\begin{itemize}
+    \item \code{push()}, \code{pop()} $\rightarrow O(\log n)$.
+    \item \code{top()} $\rightarrow O(1)$.
+\end{itemize}
+
+\subsection{Algoritmos importantes}
+\textbf{Math \& Number Theory}
+\begin{itemize}
+    \item \textbf{GCD Euclides}: $O(\log(\min(a,b)))$.
+    \item \textbf{Binary Exponentiation}: $O(\log exp)$.
+    \item \textbf{Sieve of Eratosthenes}: $O(n \log \log n)$.
+    \item \textbf{Prime Factorization}: $O(\sqrt n)$.
+\end{itemize}
+
+\textbf{Graphs}
+\begin{itemize}
+    \item \textbf{DFS / BFS}: $O(V + E)$.
+    \item \textbf{Dijkstra}: $O(E \log V)$.
+    \item \textbf{Floyd-Warshall}: $O(V^3)$.
+    \item \textbf{DSU Union-Find}: $O(\alpha(n))$.
+    \item \textbf{Segment Tree Query/Update}: $O(\log n)$.
+\end{itemize}
+
+\textbf{Técnicas generales}
+\begin{itemize}
+    \item \textbf{Two Pointers / Sliding Window}: $O(n)$.
+    \item \textbf{Lower / Upper Bound}: $O(\log n)$.
+    \item \textbf{Prefix Sum Query}: $O(1)$.
+    \item \textbf{Iterating Submasks}: $O(3^n)$.
+    \item \textbf{Coordinate Compression}: $O(n \log n)$.
+\end{itemize}
+
+\end{multicols}
+\newpage
+
+% =========================
+% 2. Matemáticas básicas y modular
+% =========================
+\section{Matemáticas, modular y teoría de números}
+\begin{multicols}{2}
+
+\subsection{GCD y LCM}
+\textbf{Built-in GCC:}
+\begin{lstlisting}
+// Requiere #include <algorithm>
+int g = __gcd(a, b);
+\end{lstlisting}
+
+\textbf{Euclides manual recursivo:}
+\begin{lstlisting}
+long long gcd(long long a, long long b) {
+    return b ? gcd(b, a % b) : a;
+}
+\end{lstlisting}
+
+\textbf{LCM seguro:}
+\begin{lstlisting}
+long long lcm(long long a, long long b) {
+    if (a == 0 || b == 0) return 0;
+    return (a / __gcd(a, b)) * b;
+}
+\end{lstlisting}
+
+\textbf{Propiedades:}
+\begin{itemize}
+    \item $gcd(a,b) \cdot lcm(a,b) = |a \cdot b|$.
+    \item $gcd(a,b) = gcd(b, a \bmod b)$.
+    \item $gcd(a,b,c) = gcd(a, gcd(b,c))$.
+\end{itemize}
+
+\subsection{Sumas notables}
+\[
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+\]
+\[
+\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}
+\]
+
+\subsection{Propiedades de módulo}
+\[
+(a+b) \bmod m = ((a \bmod m)+(b \bmod m)) \bmod m
+\]
+\[
+(a-b) \bmod m = ((a \bmod m)-(b \bmod m)+m) \bmod m
+\]
+\[
+(a \cdot b) \bmod m = ((a \bmod m)(b \bmod m)) \bmod m
+\]
+
+\textbf{Negativos:}
+\begin{lstlisting}
+(a % MOD + MOD) % MOD
+\end{lstlisting}
+
+\subsection{Binary Exponentiation}
+\begin{lstlisting}
+typedef long long ll;
+const ll MOD = 998244353;
+
+ll binpow(ll a, ll b) {
+    ll res = 1;
+    a %= MOD;
+
+    while (b) {
+        if (b & 1) res = res * a % MOD;
+        a = a * a % MOD;
+        b >>= 1;
+    }
+
+    return res;
+}
+\end{lstlisting}
+
+\subsection{Modular Inverse}
+\begin{lstlisting}
+ll modInverse(ll a) {
+    return binpow(a, MOD - 2);
+}
+\end{lstlisting}
+
+\subsection{Modular Factorials}
+\begin{lstlisting}
+const int MAXN = 1e6 + 5;
+ll fact[MAXN];
+
+void factorials() {
+    fact[0] = 1;
+    for (int i = 1; i < MAXN; i++) {
+        fact[i] = fact[i - 1] * i % MOD;
+    }
+}
+\end{lstlisting}
+
+\subsection{Modular Combinations}
+\begin{lstlisting}
+ll nCr(ll n, ll r) {
+    if (r > n) return 0;
+    return fact[n]
+        * modInverse(fact[r]) % MOD
+        * modInverse(fact[n - r]) % MOD;
+}
+\end{lstlisting}
+
+\textbf{Fórmulas:}
+\[
+C(n,r) = \frac{n!}{r!(n-r)!}
+\qquad
+P(n,r) = \frac{n!}{(n-r)!}
+\]
+
+\subsection{Criba clásica + factorización}
+\begin{lstlisting}
+const int MAXN = 1e6 + 5;
+vector<bool> isPrime(MAXN, true);
+vector<int> primes;
+
+void sieve(int n) {
+    isPrime[0] = isPrime[1] = false;
+    for (int i = 2; i <= n; i++) {
+        if (isPrime[i]) {
+            primes.push_back(i);
+            if (1LL * i * i <= n) {
+                for (long long j = 1LL * i * i; j <= n; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+    }
+}
+
+vector<int> factorize(int x) {
+    vector<int> f;
+    for (int p : primes) {
+        if (1LL * p * p > x) break;
+        while (x % p == 0) {
+            f.push_back(p);
+            x /= p;
+        }
+    }
+    if (x > 1) f.push_back(x);
+    return f;
+}
+\end{lstlisting}
+
+\subsection{Criba lineal SPF + factorización}
+\begin{lstlisting}
+const int MAXN = 1e6 + 5;
+vector<int> spf(MAXN, 0), primes;
+
+void sieve(int n) {
+    for (int i = 2; i <= n; i++) {
+        if (spf[i] == 0) {
+            spf[i] = i;
+            primes.push_back(i);
+        }
+
+        for (int p : primes) {
+            if (p > spf[i] || 1LL * i * p > n) break;
+            spf[i * p] = p;
+        }
+    }
+}
+
+vector<int> factorize(int x) {
+    vector<int> f;
+    while (x > 1) {
+        f.push_back(spf[x]);
+        x /= spf[x];
+    }
+    return f;
+}
+\end{lstlisting}
+
+\subsection[Euler's Totient Function phi]{Euler's Totient Function $\phi$}
+\textbf{Single value $O(\sqrt n)$:}
+\begin{lstlisting}
+int phi(int n) {
+    int res = n;
+    for (int i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            while (n % i == 0) n /= i;
+            res -= res / i;
+        }
+    }
+    if (n > 1) res -= res / n;
+    return res;
+}
+\end{lstlisting}
+
+\textbf{Totient sieve $O(n \log\log n)$:}
+\begin{lstlisting}
+vector<int> phi(MAXN);
+
+void sieve_phi_simple(int n) {
+    for (int i = 1; i <= n; i++) phi[i] = i;
+    for (int i = 2; i <= n; i++) {
+        if (phi[i] == i) { // i is prime
+            for (int j = i; j <= n; j += i) {
+                phi[j] -= phi[j] / i;
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\end{multicols}
+\newpage
+
+% =========================
+% 3. Arreglos y técnicas generales
+% =========================
+\section{Arreglos y técnicas generales}
+\begin{multicols}{2}
+
+\subsection{Prefix Sum 1D}
+\textbf{Construcción 1-indexed:}
+\begin{lstlisting}
+pref[0] = 0;
+for (int i = 1; i <= n; i++) {
+    pref[i] = pref[i - 1] + a[i];
+}
+\end{lstlisting}
+
+\textbf{Query $[l,r]$:}
+\[
+\text{sum}(l,r) = pref[r] - pref[l-1]
+\]
+
+\textbf{Prefix XOR:}
+\[
+\text{xor}(l,r) = pref[r] \oplus pref[l-1]
+\]
+
+\subsection{Prefix Sum 2D}
+\textbf{Construcción 1-indexed:}
+\begin{lstlisting}
+for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+        p[i][j] = a[i][j] + p[i - 1][j]
+                 + p[i][j - 1] - p[i - 1][j - 1];
+    }
+}
+\end{lstlisting}
+
+\textbf{Query rectángulo $[x_1,y_1]$ a $[x_2,y_2]$:}
+\begin{lstlisting}
+int res = p[x2][y2] - p[x1 - 1][y2]
+        - p[x2][y1 - 1] + p[x1 - 1][y1 - 1];
+\end{lstlisting}
+
+\subsection{Difference Array}
+\textbf{Update $[l,r]$ con valor $v$:}
+\begin{lstlisting}
+d[l] += v;
+d[r + 1] -= v;
+\end{lstlisting}
+
+\textbf{Resultado:} el valor final de $a[i]$ es la suma de prefijo de $d$ hasta $i$.
+
+\subsection{Binary Search básica}
+\begin{lstlisting}
+int l = 0, r = n - 1;
+
+while (l <= r) {
+    int mid = l + (r - l) / 2;
+
+    if (a[mid] == x) {
+        break;
+    }
+
+    if (a[mid] < x) l = mid + 1;
+    else r = mid - 1;
+}
+\end{lstlisting}
+
+\subsection{Binary Search on Answer}
+\begin{lstlisting}
+while (l <= r) {
+    int mid = l + (r - l) / 2;
+
+    if (check(mid)) {
+        ans = mid;
+        r = mid - 1;
+    } else {
+        l = mid + 1;
+    }
+}
+\end{lstlisting}
+
+\subsection{lower\_bound y upper\_bound}
+\textbf{lower\_bound}: primer elemento $\ge x$.
+\begin{lstlisting}
+auto it = lower_bound(v.begin(), v.end(), x);
+int idx = it - v.begin();
+if (it == v.end()) {
+    // No existe elemento >= x
+}
+\end{lstlisting}
+
+\textbf{upper\_bound}: primer elemento $> x$.
+\begin{lstlisting}
+auto it = upper_bound(v.begin(), v.end(), x);
+int idx = it - v.begin();
+\end{lstlisting}
+
+\textbf{Cantidad de $x$:}
+\begin{lstlisting}
+int cnt = upper_bound(v.begin(), v.end(), x)
+        - lower_bound(v.begin(), v.end(), x);
+\end{lstlisting}
+
+\subsection{Maximum Subarray Sum Kadane}
+\begin{lstlisting}
+long long max_so_far = -1e18, current_max = 0;
+
+for (int i = 0; i < n; i++) {
+    current_max += a[i];
+    if (max_so_far < current_max) max_so_far = current_max;
+    if (current_max < 0) current_max = 0;
+}
+\end{lstlisting}
+
+\subsection{LIS Longest Increasing Subsequence}
+\textbf{Código $O(n \log n)$:}
+\begin{lstlisting}
+vector<int> lis;
+
+for (int x : a) {
+    auto it = lower_bound(lis.begin(), lis.end(), x);
+    if (it == lis.end()) lis.push_back(x);
+    else *it = x;
+}
+
+int ans = (int)lis.size();
+\end{lstlisting}
+
+\textbf{Nota:} usa \code{upper\_bound} para Longest Non-Decreasing Subsequence.
+
+\end{multicols}
+\newpage
+
+% =========================
+% 4. Bit manipulation
+% =========================
+\section{Bit Manipulation}
+\begin{multicols}{2}
+
+\subsection{Operaciones básicas}
+\textbf{Set, check, toggle, clear:}
+\begin{lstlisting}
+mask | (1LL << i)     // Set bit i
+mask & (1LL << i)     // Check bit i
+mask ^ (1LL << i)     // Toggle bit i
+mask & ~(1LL << i)    // Clear bit i
+\end{lstlisting}
+
+\textbf{LSB Least Significant Bit:}
+\begin{lstlisting}
+mask & -mask          // Get LSB isolated
+mask & (mask - 1)     // Remove LSB
+\end{lstlisting}
+
+\subsection{Built-in functions GCC}
+\begin{lstlisting}
+__builtin_popcountll(n) // Count 1s
+__builtin_ctzll(n)      // Count trailing 0s
+__builtin_clzll(n)      // Count leading 0s
+__builtin_ffsll(n)      // 1-based index of LSB
+\end{lstlisting}
+\textit{Usa sufijo \code{ll} para \code{long long}.}
+
+\subsection{Técnicas y trucos}
+\textbf{All bits set of size $n$:}
+\begin{lstlisting}
+(1LL << n) - 1
+\end{lstlisting}
+
+\textbf{Check if power of two:}
+\begin{lstlisting}
+n && !(n & (n - 1))
+\end{lstlisting}
+
+\textbf{XOR properties:}
+\begin{itemize}
+    \item $a \oplus a = 0$.
+    \item $a \oplus 0 = a$.
+    \item Si $a \oplus b = c$, entonces $a \oplus c = b$.
+\end{itemize}
+
+\subsection{Iterar subconjuntos}
+\textbf{Todos los subconjuntos de $n$ elementos:}
+\begin{lstlisting}
+for (int i = 0; i < (1 << n); i++) {
+    for (int j = 0; j < n; j++) {
+        if (i & (1 << j)) {
+            // j is in subset
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Iterar submasks}
+\begin{lstlisting}
+for (int sub = mask; sub > 0; sub = (sub - 1) & mask) {
+    // sub is a submask of mask
+}
+// Excludes empty mask 0
+\end{lstlisting}
+
+\subsection{Subsets de tamaño K Gosper's Hack}
+\begin{lstlisting}
+int set = (1 << k) - 1;
+
+while (set < (1 << n)) {
+    // Process set
+    int c = set & -set;
+    int r = set + c;
+    set = (((r ^ set) >> 2) / c) | r;
+}
+\end{lstlisting}
+
+\subsection{Fast log2 integer}
+\begin{lstlisting}
+31 - __builtin_clz(n)    // int
+63 - __builtin_clzll(n)  // long long
+\end{lstlisting}
+
+\end{multicols}
+\newpage
+
+% =========================
+% 5. Strings
+% =========================
+\section{Strings}
+\begin{multicols}{2}
+
+\subsection{getline()}
+\begin{lstlisting}
+string s;
+getline(cin, s);
+\end{lstlisting}
+\textbf{Uso:} lee toda una línea incluyendo espacios.
+
+\subsection{cin.ignore()}
+\textbf{Precaución:} si antes usaste lectura con \texttt{cin}, queda un salto de línea pendiente.
+\begin{lstlisting}
+int n;
+cin >> n;
+cin.ignore();
+
+string s;
+getline(cin, s);
+\end{lstlisting}
+\textbf{Uso:} evita que \code{getline} lea una línea vacía.
+
+\subsection{stringstream}
+\begin{lstlisting}
+string s = "10 20 30";
+stringstream ss(s);
+
+int a, b, c;
+ss >> a >> b >> c;
+\end{lstlisting}
+\textbf{Uso:} permite separar datos desde un \code{string} como si fuera \code{cin}.
+
+\subsection{Z-function}
+\textbf{Uso:} pattern matching, bordes y prefijos. $O(n)$.
+\begin{lstlisting}
+vector<int> z_function(const string& s) {
+    int n = (int)s.size();
+    vector<int> z(n);
+    int l = 0, r = 0;
+
+    for (int i = 1; i < n; i++) {
+        if (i <= r) z[i] = min(r - i + 1, z[i - l]);
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+            z[i]++;
+        }
+        if (i + z[i] - 1 > r) {
+            l = i;
+            r = i + z[i] - 1;
+        }
+    }
+
+    return z;
+}
+\end{lstlisting}
+
+\textbf{Buscar patrón:}
+\begin{lstlisting}
+vector<int> find_occurrences_z(string text, string pat) {
+    string s = pat + "#" + text;
+    vector<int> z = z_function(s), ans;
+    int m = (int)pat.size();
+
+    for (int i = m + 1; i < (int)s.size(); i++) {
+        if (z[i] == m) ans.push_back(i - m - 1);
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{KMP Prefix Function}
+\textbf{Uso:} pattern matching y bordes. $O(n)$.
+\begin{lstlisting}
+vector<int> prefix_function(const string& s) {
+    int n = (int)s.size();
+    vector<int> pi(n);
+
+    for (int i = 1; i < n; i++) {
+        int j = pi[i - 1];
+        while (j > 0 && s[i] != s[j]) j = pi[j - 1];
+        if (s[i] == s[j]) j++;
+        pi[i] = j;
+    }
+
+    return pi;
+}
+\end{lstlisting}
+
+\textbf{Buscar patrón:}
+\begin{lstlisting}
+vector<int> kmp_search(string text, string pat) {
+    string s = pat + "#" + text;
+    vector<int> pi = prefix_function(s), ans;
+    int m = (int)pat.size();
+
+    for (int i = m + 1; i < (int)s.size(); i++) {
+        if (pi[i] == m) ans.push_back(i - 2 * m);
+    }
+
+    return ans;
+}
+\end{lstlisting}
+
+\subsection{Manacher}
+\textbf{Uso:} palíndromos en $O(n)$.
+\begin{lstlisting}
+vector<int> manacher_odd(const string& s) {
+    int n = (int)s.size();
+    vector<int> d1(n);
+    int l = 0, r = -1;
+
+    for (int i = 0; i < n; i++) {
+        int k = (i > r) ? 1 : min(d1[l + r - i], r - i + 1);
+        while (0 <= i - k && i + k < n && s[i - k] == s[i + k]) {
+            k++;
+        }
+        d1[i] = k;
+        if (i + k - 1 > r) {
+            l = i - k + 1;
+            r = i + k - 1;
+        }
+    }
+
+    return d1;
+}
+
+vector<int> manacher_even(const string& s) {
+    int n = (int)s.size();
+    vector<int> d2(n);
+    int l = 0, r = -1;
+
+    for (int i = 0; i < n; i++) {
+        int k = (i > r) ? 0 : min(d2[l + r - i + 1], r - i + 1);
+        while (0 <= i - k - 1 && i + k < n && s[i - k - 1] == s[i + k]) {
+            k++;
+        }
+        d2[i] = k;
+        if (i + k - 1 > r) {
+            l = i - k;
+            r = i + k - 1;
+        }
+    }
+
+    return d2;
+}
+\end{lstlisting}
+
+\textbf{Longest palindromic substring length:}
+\begin{lstlisting}
+int longest_palindrome_len(const string& s) {
+    auto d1 = manacher_odd(s);
+    auto d2 = manacher_even(s);
+    int ans = 0;
+
+    for (int x : d1) ans = max(ans, 2 * x - 1);
+    for (int x : d2) ans = max(ans, 2 * x);
+
+    return ans;
+}
+\end{lstlisting}
+
+\end{multicols}
+\vspace{0.4cm}
+
+% =========================
+% 6. Grafos básicos
+% =========================
+\section{Grafos básicos}
+\begin{multicols}{2}
+
+\subsection{Adjacency List}
+\begin{lstlisting}
+const int MAXN = 2e5 + 5;
+vector<int> adj[MAXN];
+\end{lstlisting}
+
+\textbf{Agregar arista no dirigida:}
+\begin{lstlisting}
+adj[u].push_back(v);
+adj[v].push_back(u);
+\end{lstlisting}
+
+\subsection{Propiedades de grafos}
+\textbf{Tree edges:}
+\[
+E = n - 1
+\]
+
+\textbf{Complete graph edges $K_n$:}
+\[
+E = \frac{n(n-1)}{2}
+\]
+
+\textbf{Handshaking Lemma:}
+\[
+\sum deg(v) = 2 \cdot |E|
+\]
+
+\subsection{DFS Depth First Search}
+\begin{lstlisting}
+bool vis[MAXN];
+
+void dfs(int u) {
+    vis[u] = true;
+    for (int v : adj[u]) {
+        if (!vis[v]) dfs(v);
+    }
+}
+\end{lstlisting}
+\textbf{Uso:} componentes, árboles y recorridos generales.
+
+\subsection{BFS Breadth First Search}
+\begin{lstlisting}
+void bfs(int s) {
+    queue<int> q;
+    q.push(s);
+    vis[s] = true;
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+            if (!vis[v]) {
+                vis[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}
+\end{lstlisting}
+\textbf{Uso:} shortest path en grafos no ponderados.
+
+\subsection{BFS Distances}
+\begin{lstlisting}
+int dist[MAXN]; // Inicializar con -1
+
+void bfs_dist(int s) {
+    queue<int> q;
+    q.push(s);
+    dist[s] = 0;
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+            if (dist[v] == -1) {
+                dist[v] = dist[u] + 1;
+                q.push(v);
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Grid Directions 4-way}
+\begin{lstlisting}
+int dx[4] = {-1, 1, 0, 0};
+int dy[4] = {0, 0, -1, 1};
+
+for (int k = 0; k < 4; k++) {
+    int nx = x + dx[k];
+    int ny = y + dy[k];
+    // Check bounds: 0 <= nx < R, 0 <= ny < C
+}
+\end{lstlisting}
+
+\subsection{Coloreado de grafos Bipartite Check}
+\textbf{Uso:} detectar si un grafo no dirigido puede colorearse con 2 colores. $O(V+E)$.
+\begin{lstlisting}
+vector<int> color(MAXN, -1);
+
+bool bfs_color(int s) {
+    queue<int> q;
+    q.push(s);
+    color[s] = 0;
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+            if (color[v] == -1) {
+                color[v] = color[u] ^ 1;
+                q.push(v);
+            } else if (color[v] == color[u]) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool is_bipartite(int n) {
+    fill(color.begin(), color.begin() + n + 1, -1);
+    for (int i = 1; i <= n; i++) {
+        if (color[i] == -1 && !bfs_color(i)) return false;
+    }
+    return true;
+}
+\end{lstlisting}
+
+\subsection{Detectar ciclo en grafo no dirigido}
+\begin{lstlisting}
+bool has_cycle_undirected(int u, int parent) {
+    vis[u] = true;
+
+    for (int v : adj[u]) {
+        if (!vis[v]) {
+            if (has_cycle_undirected(v, u)) return true;
+        } else if (v != parent) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool cycle_undirected_all(int n) {
+    fill(vis, vis + n + 1, false);
+    for (int i = 1; i <= n; i++) {
+        if (!vis[i] && has_cycle_undirected(i, -1)) return true;
+    }
+    return false;
+}
+\end{lstlisting}
+
+\subsection{Detectar ciclo en grafo dirigido}
+\textbf{Estado:} 0 = no visitado, 1 = activo, 2 = terminado.
+\begin{lstlisting}
+int state[MAXN];
+
+bool has_cycle_directed(int u) {
+    state[u] = 1;
+
+    for (int v : adj[u]) {
+        if (state[v] == 1) return true;
+        if (state[v] == 0 && has_cycle_directed(v)) return true;
+    }
+
+    state[u] = 2;
+    return false;
+}
+
+bool cycle_directed_all(int n) {
+    fill(state, state + n + 1, 0);
+    for (int i = 1; i <= n; i++) {
+        if (state[i] == 0 && has_cycle_directed(i)) return true;
+    }
+    return false;
+}
+\end{lstlisting}
+
+\end{multicols}
+\vspace{0.4cm}
+
+% =========================
+% 7. Grafos avanzados y DSU
+% =========================
+\section{Grafos avanzados y DSU}
+\begin{multicols}{2}
+
+\subsection{Dijkstra Shortest Path}
+\begin{lstlisting}
+const long long INF = 1e18;
+vector<pair<int, int>> adj[MAXN]; // {v, w}
+long long dist[MAXN];
+
+void dijkstra(int s) {
+    fill(dist, dist + MAXN, INF);
+    dist[s] = 0;
+
+    priority_queue<pair<long long, int>,
+                   vector<pair<long long, int>>,
+                   greater<pair<long long, int>>> pq;
+    pq.push({0, s});
+
+    while (!pq.empty()) {
+        long long d = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+
+        if (d > dist[u]) continue;
+
+        for (auto edge : adj[u]) {
+            int v = edge.first;
+            int w = edge.second;
+
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Disjoint Set Union DSU}
+\begin{lstlisting}
+struct DSU {
+    vector<int> parent, sz;
+
+    DSU(int n) {
+        parent.resize(n + 1);
+        sz.assign(n + 1, 1);
+        iota(parent.begin(), parent.end(), 0);
+    }
+
+    int find(int i) {
+        if (parent[i] == i) return i;
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        int root_i = find(i);
+        int root_j = find(j);
+
+        if (root_i != root_j) {
+            if (sz[root_i] < sz[root_j]) swap(root_i, root_j);
+            parent[root_j] = root_i;
+            sz[root_i] += sz[root_j];
+        }
+    }
+};
+\end{lstlisting}
+
+\end{multicols}
+\vspace{0.4cm}
+
+% =========================
+% 8. Estructuras de datos avanzadas
+% =========================
+\section{Estructuras de datos avanzadas}
+\begin{multicols}{2}
+
+\subsection{Segment Tree Sum Range}
+\begin{lstlisting}
+const int MAXN = 2e5;
+int t[4 * MAXN], a[MAXN];
+
+void build(int v, int tl, int tr) {
+    if (tl == tr) {
+        t[v] = a[tl];
+    } else {
+        int tm = (tl + tr) / 2;
+        build(2 * v, tl, tm);
+        build(2 * v + 1, tm + 1, tr);
+        t[v] = t[2 * v] + t[2 * v + 1];
+    }
+}
+
+int query(int v, int tl, int tr, int l, int r) {
+    if (l > r) return 0;
+    if (l == tl && r == tr) return t[v];
+
+    int tm = (tl + tr) / 2;
+    return query(2 * v, tl, tm, l, min(r, tm))
+         + query(2 * v + 1, tm + 1, tr, max(l, tm + 1), r);
+}
+
+void update(int v, int tl, int tr, int pos, int new_val) {
+    if (tl == tr) {
+        t[v] = new_val;
+    } else {
+        int tm = (tl + tr) / 2;
+        if (pos <= tm) update(2 * v, tl, tm, pos, new_val);
+        else update(2 * v + 1, tm + 1, tr, pos, new_val);
+        t[v] = t[2 * v] + t[2 * v + 1];
+    }
+}
+\end{lstlisting}
+
+\textbf{Nota:} para max/min, cambia \code{+} por \code{max}/\code{min} y el neutro a \code{-INF}/\code{INF}.
+
+\subsection{Fenwick Tree BIT}
+\begin{lstlisting}
+int bit[MAXN];
+
+void add(int idx, int val) {
+    for (; idx < MAXN; idx += idx & -idx) {
+        bit[idx] += val;
+    }
+}
+
+int query(int idx) {
+    int res = 0;
+    for (; idx > 0; idx -= idx & -idx) {
+        res += bit[idx];
+    }
+    return res;
+}
+
+int queryRange(int l, int r) {
+    return query(r) - query(l - 1);
+}
+\end{lstlisting}
+
+\textbf{Truco:} el BIT es 1-indexed. Si tus datos son 0-indexed, suma 1 al índice.
+
+\subsection{Policy-Based Data Structures Ordered Set}
+\begin{lstlisting}
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+
+typedef tree<int, null_type,
+             less<int>, rb_tree_tag,
+             tree_order_statistics_node_update> ordered_set;
+
+/*
+1. find_by_order(k): iterator to k-th smallest, 0-indexed.
+2. order_of_key(x): number of elements strictly smaller than x.
+*/
+
+void example() {
+    ordered_set s;
+    s.insert(1);
+    s.insert(9);
+
+    auto it = s.find_by_order(0); // k-th
+    int c = s.order_of_key(5);    // count < x
+}
+\end{lstlisting}
+
+\end{multicols}
+
+\end{document}

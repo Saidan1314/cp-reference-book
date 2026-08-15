@@ -1,0 +1,1285 @@
+\documentclass[10pt]{article}
+
+% =========================
+% Language and encoding
+% =========================
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% =========================
+% Page layout
+% =========================
+\usepackage[landscape,margin=0.9cm]{geometry}
+\usepackage{multicol}
+\setlength{\columnsep}{0.75cm}
+\setlength{\columnseprule}{0.35pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\raggedcolumns
+
+% =========================
+% Math, color, links, lists
+% =========================
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{needspace}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!45!black,
+    urlcolor=blue!45!black
+}
+
+% =========================
+% Section style
+% =========================
+\titleformat{\section}{\Large\bfseries\color{blue!45!black}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{7pt}{4pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+
+\setlist[itemize]{leftmargin=*, itemsep=1pt, topsep=2pt}
+
+% =========================
+% Code style
+% =========================
+\lstdefinestyle{pystyle}{
+    language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\bfseries\color{blue!55!black},
+    commentstyle=\itshape\color{gray!70!black},
+    stringstyle=\color{green!35!black},
+    breaklines=true,
+    breakatwhitespace=false,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black!20},
+    framerule=0.3pt,
+    xleftmargin=1pt,
+    xrightmargin=1pt,
+    aboveskip=3pt,
+    belowskip=3pt
+}
+\lstset{style=pystyle}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newenvironment{cpblock}[1]{\par\Needspace{18\baselineskip}\begin{minipage}{\linewidth}\subsection{#1}}{\end{minipage}\par\vspace{5pt}}
+
+\begin{document}
+\pagenumbering{gobble}
+
+% =========================
+% Cover
+% =========================
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Huge\bfseries Python Competitive Programming Reference Book\par}
+    \vspace{0.7cm}
+    {\Huge Arteaga Adán\par}
+    \vspace{1.2cm}
+    {\Huge Algorithms Sheet - Python Edition\par}
+    \vspace{0.5cm}
+    {\Large Clean, contest-ready, interview-friendly snippets\par}
+    \vfill
+    {\large \textbf{Python version}\par}
+    
+    \vfill
+    {\large Python version for competitive programming\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+% =========================
+\section{Python Contest Setup}
+% =========================
+\begin{cpblock}{Fast Input}
+Use this when input is large. It is usually faster than repeated \code{input()}.
+\begin{lstlisting}
+import sys
+input = sys.stdin.readline
+
+n = int(input())
+a = list(map(int, input().split()))
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Read All Tokens}
+Best for very large input with many integers.
+\begin{lstlisting}
+import sys
+
+data = sys.stdin.buffer.read().split()
+it = iter(data)
+
+n = int(next(it))
+a = [int(next(it)) for _ in range(n)]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Useful Imports}
+\begin{lstlisting}
+import sys
+from math import gcd, isqrt, inf
+from collections import deque, defaultdict, Counter
+from bisect import bisect_left, bisect_right
+from heapq import heappush, heappop
+from itertools import accumulate, permutations, combinations
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Recursion Limit}
+For deep DFS, increase the recursion limit. If recursion still risks stack issues, use iterative DFS.
+\begin{lstlisting}
+import sys
+sys.setrecursionlimit(1_000_000)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Infinity and Constants}
+\begin{lstlisting}
+INF = 10**30
+MOD = 998244353
+# Common alternative:
+MOD2 = 10**9 + 7
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Python Contest Notes}
+\begin{itemize}
+    \item Prefer \code{sys.stdin.readline} or \code{buffer.read().split()} for heavy input.
+    \item Use \code{deque} for queues, not \code{list.pop(0)}.
+    \item Use \code{heapq} for priority queues.
+    \item Use \code{bisect} for binary search on sorted arrays.
+    \item Use \code{dict}, \code{set}, and \code{Counter} heavily.
+    \item Prefer iterative DFS for very deep graphs.
+\end{itemize}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Complexities and Python Structures}
+% =========================
+\begin{cpblock}{Common Time Complexities}
+\begin{itemize}
+    \item $O(1)$ - constant: index access, hash lookup average case.
+    \item $O(\log n)$ - logarithmic: binary search, heap push/pop.
+    \item $O(\sqrt n)$ - square root: divisors, simple primality checks.
+    \item $O(n)$ - linear: one pass over an array.
+    \item $O(n \log n)$ - sorting, many greedy solutions.
+    \item $O(n^2)$ - nested loops, some dynamic programming.
+    \item $O(2^n)$ - subsets and bitmask DP.
+    \item $O(n!)$ - permutations.
+\end{itemize}
+\end{cpblock}
+
+\begin{cpblock}{Python Data Structures}
+\begin{itemize}
+    \item \code{list}: append/pop back $O(1)$ amortized, insert/delete middle $O(n)$.
+    \item \code{dict/set}: insert/find average $O(1)$, worst $O(n)$.
+    \item \code{deque}: push/pop both ends $O(1)$.
+    \item \code{heapq}: push/pop $O(\log n)$, min element $O(1)$.
+    \item \code{bisect}: search in sorted list $O(\log n)$, insertion still $O(n)$.
+    \item \code{Counter}: frequency map.
+\end{itemize}
+\end{cpblock}
+
+\begin{cpblock}{Standard Constraints}
+\begin{itemize}
+    \item Python is slower than compiled languages, so constants matter.
+    \item $n=10^5$: usually $O(n)$ or $O(n\log n)$.
+    \item $n=500$: $O(n^3)$ may pass depending on constants.
+    \item $n=20$: $O(2^n \cdot n)$ is common.
+    \item $10^7$ simple operations can be risky but possible with optimized code.
+\end{itemize}
+\end{cpblock}
+
+\begin{cpblock}{Important Algorithms}
+\begin{itemize}
+    \item GCD: $O(\log(\min(a,b)))$
+    \item Binary exponentiation: $O(\log exp)$
+    \item Sieve of Eratosthenes: $O(n\log\log n)$
+    \item Prime factorization by trial division: $O(\sqrt n)$
+    \item DFS/BFS: $O(V+E)$
+    \item Dijkstra: $O(E\log V)$
+    \item Floyd-Warshall: $O(V^3)$
+    \item DSU: $O(\alpha(n))$ amortized
+    \item Segment Tree query/update: $O(\log n)$
+    \item Fenwick Tree query/update: $O(\log n)$
+    \item KMP, Z-function, Manacher: $O(n)$
+\end{itemize}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Input, Strings, and Parsing Basics}
+% =========================
+\begin{cpblock}{Read a Full Line}
+Equivalent to reading a whole line including spaces.
+\begin{lstlisting}
+s = input().rstrip('\n')
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Split a Line}
+Equivalent to tokenizing a string by whitespace.
+\begin{lstlisting}
+s = "10 20 30"
+a, b, c = map(int, s.split())
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Character and Word Tools}
+\begin{lstlisting}
+from collections import Counter
+
+s = "abacaba"
+freq = Counter(s)
+
+words = "one two three".split()
+joined = "-".join(words)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Sorting Strings}
+\begin{lstlisting}
+s = "dcba"
+t = ''.join(sorted(s))
+
+arr = ["aaa", "b", "cc"]
+arr.sort(key=len)
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Binary Search}
+% =========================
+\begin{cpblock}{Basic Binary Search}
+\begin{lstlisting}
+l, r = 0, n - 1
+ans = -1
+
+while l <= r:
+    mid = (l + r) // 2
+    if a[mid] == x:
+        ans = mid
+        break
+    if a[mid] < x:
+        l = mid + 1
+    else:
+        r = mid - 1
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Binary Search on Answer}
+Find the minimum value satisfying a monotonic predicate.
+\begin{lstlisting}
+l, r = 0, 10**18
+ans = r
+
+while l <= r:
+    mid = (l + r) // 2
+    if check(mid):
+        ans = mid
+        r = mid - 1
+    else:
+        l = mid + 1
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{bisect Left and Right}
+\begin{lstlisting}
+from bisect import bisect_left, bisect_right
+
+idx = bisect_left(a, x)   # first position with a[i] >= x
+idx2 = bisect_right(a, x) # first position with a[i] > x
+
+count_x = bisect_right(a, x) - bisect_left(a, x)
+exists = bisect_left(a, x) < len(a) and a[bisect_left(a, x)] == x
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Last True / First True Pattern}
+\begin{lstlisting}
+# first True over [lo, hi)
+lo, hi = 0, n
+while lo < hi:
+    mid = (lo + hi) // 2
+    if ok(mid):
+        hi = mid
+    else:
+        lo = mid + 1
+ans = lo
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Math and Number Theory}
+% =========================
+\begin{cpblock}{GCD and LCM}
+\begin{lstlisting}
+from math import gcd
+
+def lcm(a, b):
+    if a == 0 or b == 0:
+        return 0
+    return abs(a // gcd(a, b) * b)
+\end{lstlisting}
+\textbf{Properties:}
+\begin{itemize}
+    \item $gcd(a,b) \cdot lcm(a,b)=|a\cdot b|$
+    \item $gcd(a,b)=gcd(b,a \bmod b)$
+    \item $gcd(a,b,c)=gcd(a,gcd(b,c))$
+\end{itemize}
+\end{cpblock}
+
+\begin{cpblock}{Manual Euclidean GCD}
+\begin{lstlisting}
+def gcd_manual(a, b):
+    while b:
+        a, b = b, a % b
+    return abs(a)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Classic Sieve + Factorization}
+\begin{lstlisting}
+def sieve(n):
+    is_prime = [True] * (n + 1)
+    is_prime[0:2] = [False, False]
+    primes = []
+    for i in range(2, n + 1):
+        if is_prime[i]:
+            primes.append(i)
+            if i * i <= n:
+                for j in range(i * i, n + 1, i):
+                    is_prime[j] = False
+    return is_prime, primes
+
+def factorize(x, primes):
+    f = []
+    for p in primes:
+        if p * p > x:
+            break
+        while x % p == 0:
+            f.append(p)
+            x //= p
+    if x > 1:
+        f.append(x)
+    return f
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Linear SPF Sieve + Factorization}
+\begin{lstlisting}
+def linear_sieve_spf(n):
+    spf = [0] * (n + 1)
+    primes = []
+    for i in range(2, n + 1):
+        if spf[i] == 0:
+            spf[i] = i
+            primes.append(i)
+        for p in primes:
+            if p > spf[i] or i * p > n:
+                break
+            spf[i * p] = p
+    return spf, primes
+
+def factorize_spf(x, spf):
+    f = []
+    while x > 1:
+        f.append(spf[x])
+        x //= spf[x]
+    return f
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Euler's Totient Function}
+\begin{lstlisting}
+def phi_single(n):
+    res = n
+    p = 2
+    while p * p <= n:
+        if n % p == 0:
+            while n % p == 0:
+                n //= p
+            res -= res // p
+        p += 1
+    if n > 1:
+        res -= res // n
+    return res
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Totient Sieve}
+\begin{lstlisting}
+def phi_sieve(n):
+    phi = list(range(n + 1))
+    for i in range(2, n + 1):
+        if phi[i] == i:  # prime
+            for j in range(i, n + 1, i):
+                phi[j] -= phi[j] // i
+    return phi
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Notable Sums}
+\[
+\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+\]
+\[
+\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}
+\]
+\begin{lstlisting}
+sum_1_to_n = n * (n + 1) // 2
+sum_squares = n * (n + 1) * (2 * n + 1) // 6
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Modular Arithmetic and Combinatorics}
+% =========================
+\begin{cpblock}{Binary Exponentiation}
+Python already has optimized modular exponentiation through \code{pow(a,b,mod)}.
+\begin{lstlisting}
+def binpow(a, b, mod):
+    res = 1
+    a %= mod
+    while b:
+        if b & 1:
+            res = res * a % mod
+        a = a * a % mod
+        b >>= 1
+    return res
+
+ans = pow(a, b, MOD)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Modular Inverse}
+Works when \code{MOD} is prime and \code{a} is not divisible by \code{MOD}.
+\begin{lstlisting}
+def mod_inverse(a, mod):
+    return pow(a, mod - 2, mod)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Modulo Properties}
+\[
+(a+b)\bmod m=((a\bmod m)+(b\bmod m))\bmod m
+\]
+\[
+(a-b)\bmod m=((a\bmod m)-(b\bmod m))\bmod m
+\]
+\[
+(a\cdot b)\bmod m=((a\bmod m)(b\bmod m))\bmod m
+\]
+In Python, \code{x \% MOD} already returns a non-negative result for positive \code{MOD}.
+\end{cpblock}
+
+\begin{cpblock}{Modular Factorials}
+\begin{lstlisting}
+MOD = 998244353
+MAXN = 10**6 + 5
+fact = [1] * MAXN
+
+for i in range(1, MAXN):
+    fact[i] = fact[i - 1] * i % MOD
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Modular Combinations}
+\begin{lstlisting}
+def nCr(n, r):
+    if r < 0 or r > n:
+        return 0
+    return fact[n] * pow(fact[r], MOD - 2, MOD) % MOD * pow(fact[n - r], MOD - 2, MOD) % MOD
+\end{lstlisting}
+\[
+C(n,r)=\frac{n!}{r!(n-r)!}
+\qquad
+P(n,r)=\frac{n!}{(n-r)!}
+\]
+\end{cpblock}
+
+\begin{cpblock}{Precomputed Inverse Factorials}
+Faster when there are many queries.
+\begin{lstlisting}
+fact = [1] * (MAXN + 1)
+invfact = [1] * (MAXN + 1)
+
+for i in range(1, MAXN + 1):
+    fact[i] = fact[i - 1] * i % MOD
+
+invfact[MAXN] = pow(fact[MAXN], MOD - 2, MOD)
+for i in range(MAXN, 0, -1):
+    invfact[i - 1] = invfact[i] * i % MOD
+
+def comb(n, r):
+    if r < 0 or r > n:
+        return 0
+    return fact[n] * invfact[r] % MOD * invfact[n - r] % MOD
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Prefix Sums and Difference Arrays}
+% =========================
+\begin{cpblock}{Prefix Sum 1D}
+\begin{lstlisting}
+pref = [0] * (n + 1)
+for i in range(n):
+    pref[i + 1] = pref[i] + a[i]
+
+def range_sum(l, r):  # inclusive, 0-indexed
+    return pref[r + 1] - pref[l]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Prefix XOR}
+\begin{lstlisting}
+px = [0] * (n + 1)
+for i in range(n):
+    px[i + 1] = px[i] ^ a[i]
+
+def range_xor(l, r):
+    return px[r + 1] ^ px[l]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Prefix Sum 2D}
+\begin{lstlisting}
+p = [[0] * (m + 1) for _ in range(n + 1)]
+
+for i in range(1, n + 1):
+    for j in range(1, m + 1):
+        p[i][j] = a[i - 1][j - 1] + p[i - 1][j] + p[i][j - 1] - p[i - 1][j - 1]
+
+def rect_sum(x1, y1, x2, y2):
+    # inclusive, 0-indexed
+    x1 += 1; y1 += 1; x2 += 1; y2 += 1
+    return p[x2][y2] - p[x1 - 1][y2] - p[x2][y1 - 1] + p[x1 - 1][y1 - 1]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Difference Array}
+Range update $[l,r]$ with value $v$.
+\begin{lstlisting}
+d = [0] * (n + 1)
+
+def add_range(l, r, v):
+    d[l] += v
+    if r + 1 < len(d):
+        d[r + 1] -= v
+
+cur = 0
+for i in range(n):
+    cur += d[i]
+    a[i] += cur
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Bit Manipulation}
+% =========================
+\begin{cpblock}{Basic Operations}
+\begin{lstlisting}
+mask | (1 << i)       # set bit i
+mask & (1 << i)       # check bit i
+mask ^ (1 << i)       # toggle bit i
+mask & ~(1 << i)      # clear bit i
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Least Significant Bit}
+\begin{lstlisting}
+mask & -mask          # isolate LSB
+mask & (mask - 1)     # remove LSB
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Python Bit Built-ins}
+\begin{lstlisting}
+x.bit_count()         # number of 1 bits
+x.bit_length()        # bits needed to represent x
+x.bit_length() - 1    # floor(log2(x)), if x > 0
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{All Bits Set of Size n}
+\begin{lstlisting}
+full = (1 << n) - 1
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Check Power of Two}
+\begin{lstlisting}
+def is_power_of_two(n):
+    return n > 0 and (n & (n - 1)) == 0
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{XOR Properties}
+\begin{itemize}
+    \item $a \oplus a = 0$
+    \item $a \oplus 0 = a$
+    \item If $a \oplus b = c$, then $a \oplus c = b$.
+\end{itemize}
+\end{cpblock}
+
+\begin{cpblock}{Iterating All Subsets}
+\begin{lstlisting}
+for mask in range(1 << n):
+    for j in range(n):
+        if mask & (1 << j):
+            pass  # j is in subset
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Iterating Submasks}
+\begin{lstlisting}
+sub = mask
+while sub:
+    # sub is a submask of mask
+    sub = (sub - 1) & mask
+# excludes empty submask 0
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Subsets of Size K - Gosper's Hack}
+\begin{lstlisting}
+set_mask = (1 << k) - 1
+while set_mask < (1 << n):
+    # process set_mask
+    c = set_mask & -set_mask
+    r = set_mask + c
+    set_mask = (((r ^ set_mask) >> 2) // c) | r
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Core Graph Algorithms}
+% =========================
+\begin{cpblock}{Adjacency List}
+\begin{lstlisting}
+adj = [[] for _ in range(n)]
+
+# undirected edge
+adj[u].append(v)
+adj[v].append(u)
+
+# directed edge
+adj[u].append(v)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{DFS Recursive}
+\begin{lstlisting}
+import sys
+sys.setrecursionlimit(1_000_000)
+
+vis = [False] * n
+
+def dfs(u):
+    vis[u] = True
+    for v in adj[u]:
+        if not vis[v]:
+            dfs(v)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{DFS Iterative}
+Safer when recursion depth is dangerous.
+\begin{lstlisting}
+def dfs_iter(start):
+    vis = [False] * n
+    stack = [start]
+    vis[start] = True
+    while stack:
+        u = stack.pop()
+        for v in adj[u]:
+            if not vis[v]:
+                vis[v] = True
+                stack.append(v)
+    return vis
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{BFS}
+\begin{lstlisting}
+from collections import deque
+
+def bfs(s):
+    vis = [False] * n
+    q = deque([s])
+    vis[s] = True
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if not vis[v]:
+                vis[v] = True
+                q.append(v)
+    return vis
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{BFS Distances}
+\begin{lstlisting}
+from collections import deque
+
+def bfs_dist(s):
+    dist = [-1] * n
+    q = deque([s])
+    dist[s] = 0
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if dist[v] == -1:
+                dist[v] = dist[u] + 1
+                q.append(v)
+    return dist
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Grid Directions}
+\begin{lstlisting}
+dx = [-1, 1, 0, 0]
+dy = [0, 0, -1, 1]
+
+for k in range(4):
+    nx = x + dx[k]
+    ny = y + dy[k]
+    if 0 <= nx < R and 0 <= ny < C:
+        pass
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Graph Properties}
+\begin{itemize}
+    \item Tree edges: $n-1$.
+    \item Complete graph edges: $\frac{n(n-1)}{2}$.
+    \item Handshaking lemma: $\sum deg(v)=2|E|$.
+\end{itemize}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Graph Coloring and Cycle Detection}
+% =========================
+\begin{cpblock}{Bipartite Coloring}
+2-color an undirected graph. If impossible, the graph is not bipartite.
+\begin{lstlisting}
+from collections import deque
+
+def bipartite_color(adj):
+    n = len(adj)
+    color = [-1] * n
+    for s in range(n):
+        if color[s] != -1:
+            continue
+        color[s] = 0
+        q = deque([s])
+        while q:
+            u = q.popleft()
+            for v in adj[u]:
+                if color[v] == -1:
+                    color[v] = color[u] ^ 1
+                    q.append(v)
+                elif color[v] == color[u]:
+                    return False, color
+    return True, color
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Greedy Graph Coloring}
+Assigns a valid coloring, not necessarily minimum.
+\begin{lstlisting}
+def greedy_coloring(adj):
+    n = len(adj)
+    color = [-1] * n
+    for u in range(n):
+        used = {color[v] for v in adj[u] if color[v] != -1}
+        c = 0
+        while c in used:
+            c += 1
+        color[u] = c
+    return color
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Cycle Detection - Undirected Graph}
+\begin{lstlisting}
+def has_cycle_undirected(adj):
+    n = len(adj)
+    vis = [False] * n
+
+    def dfs(u, parent):
+        vis[u] = True
+        for v in adj[u]:
+            if not vis[v]:
+                if dfs(v, u):
+                    return True
+            elif v != parent:
+                return True
+        return False
+
+    for i in range(n):
+        if not vis[i] and dfs(i, -1):
+            return True
+    return False
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Cycle Detection - Directed Graph}
+Use states: 0 = unvisited, 1 = visiting, 2 = done.
+\begin{lstlisting}
+def has_cycle_directed(adj):
+    n = len(adj)
+    state = [0] * n
+
+    def dfs(u):
+        state[u] = 1
+        for v in adj[u]:
+            if state[v] == 1:
+                return True
+            if state[v] == 0 and dfs(v):
+                return True
+        state[u] = 2
+        return False
+
+    for i in range(n):
+        if state[i] == 0 and dfs(i):
+            return True
+    return False
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Shortest Paths and DSU}
+% =========================
+\begin{cpblock}{Dijkstra}
+Graph format: \code{adj[u] = [(v, w), ...]}.
+\begin{lstlisting}
+from heapq import heappush, heappop
+
+INF = 10**30
+
+def dijkstra(adj, s):
+    n = len(adj)
+    dist = [INF] * n
+    dist[s] = 0
+    pq = [(0, s)]
+
+    while pq:
+        d, u = heappop(pq)
+        if d != dist[u]:
+            continue
+        for v, w in adj[u]:
+            nd = d + w
+            if nd < dist[v]:
+                dist[v] = nd
+                heappush(pq, (nd, v))
+    return dist
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Disjoint Set Union}
+\begin{lstlisting}
+class DSU:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.sz = [1] * n
+
+    def find(self, x):
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def unite(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return False
+        if self.sz[ra] < self.sz[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra
+        self.sz[ra] += self.sz[rb]
+        return True
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Floyd-Warshall}
+All-pairs shortest paths. Use only for small $n$.
+\begin{lstlisting}
+for k in range(n):
+    for i in range(n):
+        dik = dist[i][k]
+        for j in range(n):
+            nd = dik + dist[k][j]
+            if nd < dist[i][j]:
+                dist[i][j] = nd
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{String Matching Algorithms}
+% =========================
+\begin{cpblock}{KMP Prefix Function}
+\begin{lstlisting}
+def prefix_function(s):
+    n = len(s)
+    pi = [0] * n
+    for i in range(1, n):
+        j = pi[i - 1]
+        while j > 0 and s[i] != s[j]:
+            j = pi[j - 1]
+        if s[i] == s[j]:
+            j += 1
+        pi[i] = j
+    return pi
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{KMP Pattern Matching}
+Find all occurrences of pattern \code{p} in text \code{t}.
+\begin{lstlisting}
+def kmp_search(t, p):
+    s = p + '#' + t
+    pi = prefix_function(s)
+    ans = []
+    m = len(p)
+    for i in range(m + 1, len(s)):
+        if pi[i] == m:
+            ans.append(i - 2 * m)
+    return ans
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Z-Function}
+\begin{lstlisting}
+def z_function(s):
+    n = len(s)
+    z = [0] * n
+    l = r = 0
+    for i in range(1, n):
+        if i <= r:
+            z[i] = min(r - i + 1, z[i - l])
+        while i + z[i] < n and s[z[i]] == s[i + z[i]]:
+            z[i] += 1
+        if i + z[i] - 1 > r:
+            l, r = i, i + z[i] - 1
+    return z
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Z-Function Pattern Matching}
+\begin{lstlisting}
+def z_search(t, p):
+    s = p + '#' + t
+    z = z_function(s)
+    m = len(p)
+    return [i - m - 1 for i in range(m + 1, len(s)) if z[i] >= m]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Manacher - Odd Palindromes}
+\code{d1[i]} = radius of odd palindrome centered at \code{i}.
+\begin{lstlisting}
+def manacher_odd(s):
+    n = len(s)
+    d1 = [0] * n
+    l, r = 0, -1
+    for i in range(n):
+        k = 1 if i > r else min(d1[l + r - i], r - i + 1)
+        while 0 <= i - k and i + k < n and s[i - k] == s[i + k]:
+            k += 1
+        d1[i] = k
+        if i + k - 1 > r:
+            l, r = i - k + 1, i + k - 1
+    return d1
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Manacher - Even Palindromes}
+\code{d2[i]} = radius of even palindrome centered between \code{i-1} and \code{i}.
+\begin{lstlisting}
+def manacher_even(s):
+    n = len(s)
+    d2 = [0] * n
+    l, r = 0, -1
+    for i in range(n):
+        k = 0 if i > r else min(d2[l + r - i + 1], r - i + 1)
+        while 0 <= i - k - 1 and i + k < n and s[i - k - 1] == s[i + k]:
+            k += 1
+        d2[i] = k
+        if i + k - 1 > r:
+            l, r = i - k, i + k - 1
+    return d2
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Dynamic Programming and Sequences}
+% =========================
+\begin{cpblock}{LIS - Longest Increasing Subsequence}
+$O(n\log n)$ length only.
+\begin{lstlisting}
+from bisect import bisect_left, bisect_right
+
+def lis_length(a):
+    lis = []
+    for x in a:
+        i = bisect_left(lis, x)
+        if i == len(lis):
+            lis.append(x)
+        else:
+            lis[i] = x
+    return len(lis)
+
+# For longest non-decreasing subsequence, use bisect_right.
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Maximum Subarray Sum - Kadane}
+Works even if all numbers are negative.
+\begin{lstlisting}
+def kadane(a):
+    best = -10**30
+    cur = 0
+    for x in a:
+        cur = max(x, cur + x)
+        best = max(best, cur)
+    return best
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Basic 1D DP Pattern}
+\begin{lstlisting}
+dp = [0] * (n + 1)
+dp[0] = 1
+
+for i in range(1, n + 1):
+    # transition here
+    dp[i] = dp[i - 1]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Bitmask DP Skeleton}
+\begin{lstlisting}
+INF = 10**30
+dp = [INF] * (1 << n)
+dp[0] = 0
+
+for mask in range(1 << n):
+    for i in range(n):
+        if not (mask & (1 << i)):
+            new_mask = mask | (1 << i)
+            dp[new_mask] = min(dp[new_mask], dp[mask] + cost[i])
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{Advanced Data Structures}
+% =========================
+\begin{cpblock}{Fenwick Tree - BIT}
+1-indexed structure for prefix sums.
+\begin{lstlisting}
+class Fenwick:
+    def __init__(self, n):
+        self.n = n
+        self.bit = [0] * (n + 1)
+
+    def add(self, idx, val):
+        while idx <= self.n:
+            self.bit[idx] += val
+            idx += idx & -idx
+
+    def sum(self, idx):
+        res = 0
+        while idx > 0:
+            res += self.bit[idx]
+            idx -= idx & -idx
+        return res
+
+    def range_sum(self, l, r):
+        return self.sum(r) - self.sum(l - 1)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Segment Tree - Range Sum}
+Iterative version: compact and fast in Python.
+\begin{lstlisting}
+class SegTree:
+    def __init__(self, a):
+        self.n = len(a)
+        self.t = [0] * (2 * self.n)
+        self.t[self.n:] = a[:]
+        for i in range(self.n - 1, 0, -1):
+            self.t[i] = self.t[i << 1] + self.t[i << 1 | 1]
+
+    def update(self, pos, val):
+        pos += self.n
+        self.t[pos] = val
+        pos >>= 1
+        while pos:
+            self.t[pos] = self.t[pos << 1] + self.t[pos << 1 | 1]
+            pos >>= 1
+
+    def query(self, l, r):  # inclusive [l, r]
+        l += self.n
+        r += self.n + 1
+        res = 0
+        while l < r:
+            if l & 1:
+                res += self.t[l]
+                l += 1
+            if r & 1:
+                r -= 1
+                res += self.t[r]
+            l >>= 1
+            r >>= 1
+        return res
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Coordinate Compression}
+\begin{lstlisting}
+vals = sorted(set(a))
+comp = {x: i for i, x in enumerate(vals)}
+compressed = [comp[x] for x in a]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Order Statistics with Fenwick}
+Useful when values are compressed to $1..m$.
+\begin{lstlisting}
+def kth(bit, k):
+    # returns smallest idx with prefix sum >= k
+    idx = 0
+    step = 1 << (bit.n.bit_length() - 1)
+    while step:
+        nxt = idx + step
+        if nxt <= bit.n and bit.bit[nxt] < k:
+            idx = nxt
+            k -= bit.bit[nxt]
+        step >>= 1
+    return idx + 1
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Heap Queue}
+\begin{lstlisting}
+from heapq import heappush, heappop
+
+pq = []
+heappush(pq, (dist, node))
+d, u = heappop(pq)
+
+# max-heap trick
+heappush(pq, -x)
+x = -heappop(pq)
+\end{lstlisting}
+\end{cpblock}
+
+\newpage
+
+% =========================
+\section{General Techniques and Tricks}
+% =========================
+\begin{cpblock}{Two Pointers}
+\begin{lstlisting}
+l = 0
+for r in range(n):
+    # add a[r]
+    while bad(l, r):
+        # remove a[l]
+        l += 1
+    # current window is [l, r]
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Sliding Window Sum}
+\begin{lstlisting}
+cur = sum(a[:k])
+best = cur
+for r in range(k, n):
+    cur += a[r] - a[r - k]
+    best = max(best, cur)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Frequency Map}
+\begin{lstlisting}
+from collections import defaultdict, Counter
+
+freq = defaultdict(int)
+for x in a:
+    freq[x] += 1
+
+cnt = Counter(a)
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Sorting with Keys}
+\begin{lstlisting}
+points.sort()                  # lexicographic
+points.sort(key=lambda p: p[1]) # by y
+points.sort(key=lambda p: (p[0], -p[1]))
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Output Fast}
+\begin{lstlisting}
+import sys
+
+ans = ["YES", "NO", "YES"]
+sys.stdout.write("\n".join(ans))
+\end{lstlisting}
+\end{cpblock}
+
+\begin{cpblock}{Memory Tricks}
+\begin{itemize}
+    \item Avoid huge lists of lists if a sparse structure works.
+    \item For grids, store characters as strings when read-only.
+    \item Use arrays of integers instead of dictionaries when indices are dense.
+    \item Use \code{bytearray(n)} for boolean-like arrays when memory is tight.
+\end{itemize}
+\end{cpblock}
+
+
+\end{document}

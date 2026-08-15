@@ -1,0 +1,36 @@
+# ---------------------------------------------
+# LaTeX build artifacts
+# ---------------------------------------------
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.nav
+*.snm
+*.vrb
+*.idx
+*.ilg
+*.ind
+*.xdv
+
+# ---------------------------------------------
+# Editors / OS
+# ---------------------------------------------
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# NOTE: the compiled PDFs are intentionally tracked.
+# They are the deliverable people come here for.
